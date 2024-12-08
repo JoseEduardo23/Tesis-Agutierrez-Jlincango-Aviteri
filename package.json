@@ -2,9 +2,11 @@
   "name": "tesis_",
   "version": "1.0.0",
   "main": "index.js",
+  "type":"module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js"
+    "start": "node src/index.js",
+    "dev":"node --watch src/index.js"
   },
   "author": "",
   "license": "ISC",
