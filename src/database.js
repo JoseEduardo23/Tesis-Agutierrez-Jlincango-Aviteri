@@ -10,9 +10,4 @@ const connection = async()=>{
         console.log(error);
     }
 }
-
-<<<<<<< HEAD
 export default connection
-=======
-export default  connection
->>>>>>> 156a553277371ddd5943d49cc1b7a23d73f339c2
