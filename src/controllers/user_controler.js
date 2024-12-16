@@ -31,6 +31,7 @@ const login = async(req,res)=>{
         _id,
         email:usuarioBDD.email
     })
+    
 }
 
 const confirmEmail = async (req,res)=>{
@@ -81,11 +82,74 @@ const nuevoPassword = async (req,res)=>{
     await usuarioBDD.save()
     res.status(200).json({msg:"Felicitaciones, ya puedes iniciar sesión con tu nuevo password"}) 
 }
+
+
+const actualizarPassword = async (req, res) => {
+    const { passwordactual, passwordnuevo } = req.body;
+    if (Object.values(req.body).includes("")) {
+        return res.status(404).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+    }
+
+    if (!req.usuarioBDD) {
+        return res.status(404).json({ msg: "No se encontró al usuario en la solicitud" });
+    }
+
+    const usuarioBDD = await Usuario.findById(req.usuarioBDD._id);
+    if (!usuarioBDD) {
+        return res.status(404).json({ msg: `Lo sentimos, no existe el usuario con ID: ${req.usuarioBDD._id}` });
+    }
+
+    const verificarPassword = await usuarioBDD.matchPassword(passwordactual);
+    if (!verificarPassword) {
+        return res.status(404).json({ msg: "Lo sentimos, el password actual no es el correcto" });
+    }
+
+    usuarioBDD.password = await usuarioBDD.encrypPassword(passwordnuevo);
+    await usuarioBDD.save();
+
+    res.status(200).json({ msg: "Password actualizado correctamente" });
+};
+
+const actualizarPerfil = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ msg: `Lo sentimos, debe ser un id válido` });
+    }
+    if (Object.values(req.body).includes("")) {
+        return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+    }
+    const usuarioBDD = await Usuario.findById(id);
+    if (!usuarioBDD) {
+        return res.status(404).json({ msg: `Lo sentimos, no existe el usuario con ID: ${id}` });
+    }
+
+    if (usuarioBDD.email !== req.body.email) {
+        const usuarioBDDMail = await Usuario.findOne({ email: req.body.email });
+        if (usuarioBDDMail) {
+            return res.status(404).json({ msg: "Lo sentimos, el email ya se encuentra registrado" });
+        }
+    }
+
+    usuarioBDD.nombre = req.body.nombre || usuarioBDD?.nombre;
+    usuarioBDD.apellido = req.body.apellido || usuarioBDD?.apellido;
+    usuarioBDD.direccion = req.body.direccion || usuarioBDD?.direccion;
+    usuarioBDD.telefono = req.body.telefono || usuarioBDD?.telefono;
+    usuarioBDD.email = req.body.email || usuarioBDD?.email;
+
+    await usuarioBDD.save();
+
+    res.status(200).json({ msg: "Perfil actualizado correctamente" });
+};
+
+
 export {
     registro,
     login,
     confirmEmail,
 	recuperarPassword,
     comprobarTokenPasword,
-	nuevoPassword
+	nuevoPassword,
+    actualizarPassword,
+    actualizarPerfil
 }
