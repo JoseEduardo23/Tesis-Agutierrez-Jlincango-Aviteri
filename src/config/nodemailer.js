@@ -20,7 +20,9 @@ const sendMailToUser = (userMail, token) => {
         from: process.env.USER_MAILTRAP,
         to: userMail,
         subject: "Verifica tu cuenta",
-        html: `<p>Hola, haz clic <a href="${process.env.URL_BACKEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+        html: `
+         <h1>Sistema de prueba (TIENDANIMAL - 🛒🐶🦴)</h1> <br>
+        <p>Hola, haz clic <a href="${process.env.URL_BACKEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
     
 

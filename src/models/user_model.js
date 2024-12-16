@@ -1,5 +1,5 @@
 import {Schema, model} from 'mongoose'
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 const usuarioSchema = new Schema({
     nombre:{
@@ -46,11 +46,11 @@ const usuarioSchema = new Schema({
     },
     confirmEmail:{
         type:Boolean,
-        default:false
+        default:null
     },
     mascotas:{
         type:String,
-        default:false
+        default:null
     }
 
 

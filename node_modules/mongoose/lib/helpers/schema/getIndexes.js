@@ -39,6 +39,11 @@ module.exports = function getIndexes(schema) {
         continue;
       }
 
+      if (path._duplicateKeyErrorMessage != null) {
+        schema._duplicateKeyErrorMessagesByPath = schema._duplicateKeyErrorMessagesByPath || {};
+        schema._duplicateKeyErrorMessagesByPath[key] = path._duplicateKeyErrorMessage;
+      }
+
       if (path.$isMongooseDocumentArray || path.$isSingleNested) {
         if (get(path, 'options.excludeIndexes') !== true &&
             get(path, 'schemaOptions.excludeIndexes') !== true &&
@@ -78,7 +83,15 @@ module.exports = function getIndexes(schema) {
           field[prefix + key] = 'text';
           delete options.text;
         } else {
-          const isDescendingIndex = Number(index) === -1;
+          let isDescendingIndex = false;
+          if (index === 'descending' || index === 'desc') {
+            isDescendingIndex = true;
+          } else if (index === 'ascending' || index === 'asc') {
+            isDescendingIndex = false;
+          } else {
+            isDescendingIndex = Number(index) === -1;
+          }
+
           field[prefix + key] = isDescendingIndex ? -1 : 1;
         }
 

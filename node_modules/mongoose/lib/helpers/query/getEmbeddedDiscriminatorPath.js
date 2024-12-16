@@ -28,7 +28,8 @@ module.exports = function getEmbeddedDiscriminatorPath(schema, update, filter, p
   const updatedPathsByFilter = updatedPathsByArrayFilter(update);
 
   for (let i = 0; i < parts.length; ++i) {
-    const subpath = cleanPositionalOperators(parts.slice(0, i + 1).join('.'));
+    const originalSubpath = parts.slice(0, i + 1).join('.');
+    const subpath = cleanPositionalOperators(originalSubpath);
     schematype = schema.path(subpath);
     if (schematype == null) {
       continue;
@@ -56,6 +57,11 @@ module.exports = function getEmbeddedDiscriminatorPath(schema, update, filter, p
         discriminatorKey = filter[wrapperPath].$elemMatch[key];
       }
 
+      const discriminatorKeyUpdatePath = originalSubpath + '.' + key;
+      if (discriminatorKeyUpdatePath in update) {
+        discriminatorKey = update[discriminatorKeyUpdatePath];
+      }
+
       if (discriminatorValuePath in update) {
         discriminatorKey = update[discriminatorValuePath];
       }
@@ -75,7 +81,11 @@ module.exports = function getEmbeddedDiscriminatorPath(schema, update, filter, p
         continue;
       }
 
-      const discriminatorSchema = getDiscriminatorByValue(schematype.caster.discriminators, discriminatorKey).schema;
+      const discriminator = getDiscriminatorByValue(schematype.caster.discriminators, discriminatorKey);
+      const discriminatorSchema = discriminator && discriminator.schema;
+      if (discriminatorSchema == null) {
+        continue;
+      }
 
       const rest = parts.slice(i + 1).join('.');
       schematype = discriminatorSchema.path(rest);
