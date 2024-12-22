@@ -4,9 +4,9 @@ import { actualizarUsuario, detalleUsuario, eliminarUsuario, listarUsuarios, reg
 
 const router = Router()
 
-router.post('/usuario/registro', registrarUsuario)
-router.get('/usuarios', listarUsuarios)
-router.get('/usuario-detalle/:id',  detalleUsuario)
+router.post('/usuario/registro',verificarAutenticacion, registrarUsuario)
+router.get('/usuarios',verificarAutenticacion, listarUsuarios)
+router.get('/usuario-detalle/:id',verificarAutenticacion,  detalleUsuario)
 router.put('/usuario-actualizar/:id', actualizarUsuario)
 router.delete('/usuario-eliminar/:id',  eliminarUsuario)
 

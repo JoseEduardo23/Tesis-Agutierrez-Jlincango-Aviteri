@@ -3,7 +3,7 @@ import Usuario from "../models/usuario_model.js"
 import mongoose from "mongoose"
 
 const registrarUsuario = async (req, res) => {
-    const { email, nombre, apellido, direccion, telefono } = req.body;
+    const {email} = req.body;
 
     if (Object.values(req.body).includes("")) {
         return res.status(400).json({ msg: "Debes llenar todos los campos" });
@@ -38,6 +38,8 @@ const listarUsuarios = async (req, res) => {
     if (!usuariosBDD.length) return res.status(404).json({msg: "No se encontraron usuarios registrados."})
     res.status(200).json(usuariosBDD)    
 }
+
+
 const detalleUsuario = async (req, res) => {
     const { id } = req.params;
 
@@ -47,10 +49,11 @@ const detalleUsuario = async (req, res) => {
 
     const usuario = await Usuario.findById(id)
         .select("-createdAt -updatedAt -__v")
-        .populate('administrador', '_id nombre apellido'); // Ajusta según tus relaciones
-
+        .populate('nombre apellido'); 
     res.status(200).json(usuario);
 }
+
+
 const actualizarUsuario = async (req, res) => {
     const {id} = req.params 
     const {nombre, apellido, email, direccion, telefono} = req.body 
