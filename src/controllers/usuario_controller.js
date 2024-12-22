@@ -3,10 +3,34 @@ import Usuario from "../models/usuario_model.js"
 import mongoose from "mongoose"
 
 const registrarUsuario = async (req, res) => {
-    res.send("Usuario eliminado")
+    const { email, nombre, apellido, direccion, telefono } = req.body;
 
+    if (Object.values(req.body).includes("")) {
+        return res.status(400).json({ msg: "Debes llenar todos los campos" });
+    }
 
-}
+    const verificarEmailBDD = await Usuario.findOne({ email });
+    if (verificarEmailBDD) {
+        return res.status(400).json({ msg: "El email ya se encuentra registrado" });
+    }
+
+    const nuevoUsuario = new Usuario(req.body);
+
+    const passwordEncrypt = Math.random().toString(36).slice(2);
+    nuevoUsuario.password = await nuevoUsuario.encriptarPassword("use" + passwordEncrypt);
+
+    if (req.AdministradorBDD) {
+        nuevoUsuario.usuario = req.AdministradorBDD._id;
+    } else {
+        return res.status(400).json({ msg: "Usuario no autenticado correctamente" });
+    }
+
+    await sendMailToPaciente(email, "use" + passwordEncrypt); 
+    await nuevoUsuario.save();
+
+    return res.status(200).json({ msg: "Registro exitoso del usuario y correo enviado" });
+};
+
 
 
 const listarUsuarios = async (req, res) => {
@@ -15,7 +39,17 @@ const listarUsuarios = async (req, res) => {
     res.status(200).json(usuariosBDD)    
 }
 const detalleUsuario = async (req, res) => {
-    res.send("Detalle de usuario")
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ msg: `Lo sentimos, no existe el usuario con el ID ${id}` });
+    }
+
+    const usuario = await Usuario.findById(id)
+        .select("-createdAt -updatedAt -__v")
+        .populate('administrador', '_id nombre apellido'); // Ajusta según tus relaciones
+
+    res.status(200).json(usuario);
 }
 const actualizarUsuario = async (req, res) => {
     const {id} = req.params 
