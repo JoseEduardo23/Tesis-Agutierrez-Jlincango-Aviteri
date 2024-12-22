@@ -1,5 +1,5 @@
 DESARROLLO DE SISTEMA PARA LA RECOMENDACION DE DIETAS PERSONALIZADAS PARA MASCOTAS MEDIANTE EL USO DE IA.
-SPRINT 0
+SPRINT 0 📝
 
  -Descripcion del componente desarrollado
  
@@ -17,7 +17,7 @@ SPRINT 0
 
  ![image](https://github.com/user-attachments/assets/feaa6ed8-0e81-474e-95d6-8432d4521bed)
 
- SPRINT 1
+ SPRINT 1 📝
 
  •	Creación de endpoint para el registro.
  
@@ -30,4 +30,16 @@ SPRINT 0
  •	Creación de endpoints para la actualización del perfil.
  
  •	Creación de endpoints para la actualización de la contraseña.
+
+ SPRINT 2 📝
+
+ •	Creación de endpoint para el registro de un cliente.
+ 
+ •	Creación de endpoint para listar clientes existentes.
+ 
+ •	Creación de endpoints para mostrar el detalle de un cliente.
+ 
+ •	Creación de endpoints para actualizar un cliente.
+ 
+ •	Creación de endpoints para eliminar un cliente.
 
