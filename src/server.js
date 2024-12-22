@@ -2,7 +2,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import router from './routers/user_router.js';
+import adminrouter from './routers/admin_router.js';
+import userrouter from './routers/usuario_router.js';
 
 // Inicializaciones
 const app = express();
@@ -20,7 +21,12 @@ app.get('/', (req, res) => {
     res.send("Server on");
 });
 
-app.use('/api', router);
+//Ruta de los administradores
+app.use('/api', adminrouter);
+
+//Ruta de los usuarios 
+app.use('/api', userrouter);
+
 
 // Manejo de una ruta que no sea encontrada
 app.use((req, res) => res.status(404).send("Endpoint no encontrado - 404"));

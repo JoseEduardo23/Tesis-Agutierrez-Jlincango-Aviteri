@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import { comprobarTokenPasword, confirmEmail, login, nuevoPassword, recuperarPassword, registro,actualizarPassword, actualizarPerfil, perfilUsuario} from '../controllers/user_controler.js'
+import { comprobarTokenPasword, confirmEmail, login, nuevoPassword, recuperarPassword, registro,actualizarPassword, actualizarPerfil, perfilAdministrador} from '../controllers/admin_controler.js'
 import { verificarAutenticacion } from '../helpers/crearJWT.js'
 const router = Router()
 
@@ -22,8 +22,9 @@ router.get("/recuperar-password/:token", comprobarTokenPasword)
 router.post("/nuevo-password/:token", nuevoPassword)
 
 
+
 //Endpoint para ver el perfil del usuario
-router.get('/perfil-usuario',verificarAutenticacion,perfilUsuario)
+router.get('/perfil-admin',verificarAutenticacion, perfilAdministrador)
 
 //Endpoint para actualizar el perfil del usuario
 router.put('/perfil/:id',verificarAutenticacion, actualizarPerfil);

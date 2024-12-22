@@ -1,7 +1,7 @@
 import {Schema, model} from 'mongoose'
 import bcrypt from "bcryptjs"
 
-const usuarioSchema = new Schema({
+const adminSchema = new Schema({
     nombre:{
         type:String,
         require:true,
@@ -14,7 +14,7 @@ const usuarioSchema = new Schema({
     },
     rol:{
         type:String,
-        default:"Cliente"
+        default:"Administrador"
     },
     direccion:{
         type:String,
@@ -47,31 +47,26 @@ const usuarioSchema = new Schema({
     confirmEmail:{
         type:Boolean,
         default:null
-    },
-    mascotas:{
-        type:String,
-        default:null
     }
-
-
+    
 },{
     timestamps:true
 })
 
-usuarioSchema.methods.encrypPassword = async function(password){
+adminSchema.methods.encrypPassword = async function(password){
     const salt = await bcrypt.genSalt(10)
     const passwordEncryp = await bcrypt.hash(password,salt)
     return passwordEncryp
 }
 
-usuarioSchema.methods.matchPassword = async function(password){
+adminSchema.methods.matchPassword = async function(password){
     const response = await bcrypt.compare(password,this.password)
     return response
 }
 
-usuarioSchema.methods.crearToken = function(){
+adminSchema.methods.crearToken = function(){
     const tokenGenerado = this.token = Math.random().toString(36).slice(2)
     return tokenGenerado
 }
 
-export default model('Usuario',usuarioSchema)
+export default model('Admin',adminSchema)
