@@ -31,6 +31,9 @@ SPRINT 0 📝
  
  •	Creación de endpoints para la actualización de la contraseña.
 
+ ![image](https://github.com/user-attachments/assets/d2092c0e-4924-4df1-a794-0b4ce774de63)
+
+
  SPRINT 2 📝
 
  •	Creación de endpoint para el registro de un cliente.
@@ -42,4 +45,7 @@ SPRINT 0 📝
  •	Creación de endpoints para actualizar un cliente.
  
  •	Creación de endpoints para eliminar un cliente.
+
+ ![image](https://github.com/user-attachments/assets/b41ce61c-39fd-4641-a738-1615fb7bcd30)
+
 
