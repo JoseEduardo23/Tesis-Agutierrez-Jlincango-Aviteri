@@ -1,0 +1,73 @@
+/* Estilo para el main */
+main {
+  background-color: white;
+  padding-left: 2.5rem; /* 10px */
+  padding-right: 2.5rem; /* 10px */
+}
+.logo1{
+  width: 70px;
+}
+
+@media (min-width: 768px) {
+  main {
+      padding-left: 5rem; /* 20px */
+      padding-right: 5rem; /* 20px */
+  }
+}
+
+@media (min-width: 1024px) {
+  main {
+      padding-left: 10rem; /* 40px */
+      padding-right: 10rem; /* 40px */
+  }
+}
+
+.dark main {
+  background-color: #2d3748; /* gray-800 */
+}
+
+/* Estilo para el nav */
+nav {
+  padding: 2.5rem; /* 10px */
+  margin-bottom: 3rem; /* 12px */
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Estilo para el h1 */
+h1 {
+  font-size: 1.5rem; /* 2xl */
+  font-weight: bold;
+}
+
+.dark h1 {
+  color: white;
+}
+
+/* Estilo para el ul */
+ul {
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo para el img */
+img {
+  cursor: pointer;
+}
+
+/* Estilo para el link */
+a {
+  background-color: #4b5563; /* gray-600 */
+  color: #cbd5e0; /* slate-400 */
+  padding-left: 1.5rem; /* 6px */
+  padding-right: 1.5rem; /* 6px */
+  padding-top: 0.5rem; /* 2px */
+  padding-bottom: 0.5rem; /* 2px */
+  border-radius: 9999px; /* rounded-full */
+  margin-left: 2rem; /* 8px */
+}
+
+a:hover {
+  background-color: #1f2937; /* gray-900 */
+  color: white;
+}
