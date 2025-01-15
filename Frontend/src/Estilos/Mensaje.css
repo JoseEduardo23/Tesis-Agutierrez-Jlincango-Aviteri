@@ -1,0 +1,50 @@
+/* Contenedor principal del mensaje */
+.mensaje-container {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-left-width: 4px;
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.mensaje-success {
+    border-color: #34d399; /* Green */
+    background-color: #d1fae5; /* Light Green */
+}
+
+.mensaje-error {
+    border-color: #f87171; /* Red */
+    background-color: #fee2e2; /* Light Red */
+}
+
+/* Icono de éxito o error */
+.mensaje-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.icon-success {
+    color: #34d399; /* Green */
+}
+
+.icon-error {
+    color: #f87171; /* Red */
+}
+
+/* Contenedor del mensaje de texto */
+.mensaje-text {
+    margin-left: 0.75rem;
+}
+
+.mensaje-message {
+    font-size: 0.875rem; /* Small */
+}
+
+.message-success {
+    color: #34d399; /* Green */
+}
+
+.message-error {
+    color: #f87171; /* Red */
+}
