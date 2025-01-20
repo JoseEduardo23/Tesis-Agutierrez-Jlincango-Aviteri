@@ -1,6 +1,6 @@
 import Producto from "../models/product_model.js";
 import mongoose from 'mongoose';
-
+//
 const crearProducto = async (req, res) => {
     const { nombre, descripcion, precio, stock, categoria, imagen } = req.body;
 
