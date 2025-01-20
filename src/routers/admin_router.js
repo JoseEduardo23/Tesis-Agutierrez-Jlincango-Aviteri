@@ -4,10 +4,10 @@ import { verificarAutenticacion } from '../helpers/crearJWT.js'
 const router = Router()
 
 //Endpoint para el registro
-router.post("/registro", registro)
+router.post("/register", registro)
 
 //Endpoint para confirmar el regitro
-router.get("/confirmar/:token", confirmEmail)
+router.get("/confirmar-token/:token", confirmEmail)
 
 //Endpoint para el inicio de sesion
 router.post("/login", login)
