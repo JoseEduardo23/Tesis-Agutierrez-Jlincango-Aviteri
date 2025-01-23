@@ -17,9 +17,8 @@ const registro = async (req, res) => {
 }
 
 const confirmEmail = async (req, res) => {
-    const { token } = req.params;
-    if (!(token)) return res.status(400).json({ msg: "Lo sentimos, no se puede validar la cuenta" });
-    const AdministradorBDD = await Administrador.findOne({ token });
+    if (!(req.params.token)) return res.status(400).json({ msg: "Lo sentimos, no se puede validar la cuenta" });
+    const AdministradorBDD = await Administrador.findOne({ token:req.params.token});
     if (!AdministradorBDD?.token) return res.status(404).json({ msg: "La cuenta ya ha sido confirmada" });
     AdministradorBDD.token = null;
     AdministradorBDD.confirmEmail = true;
@@ -49,7 +48,7 @@ const login = async (req, res) => {
         return res.status(404).json({ msg: "Lo sentimos, la contraseña no es correcta" });
     }
 
-    const tokenJWT = geenrarJWT(AdministradorBDD._id, "Administrador");
+    const token = geenrarJWT(AdministradorBDD._id, "Administrador");
 
     return res.status(200).json({
         nombre: AdministradorBDD.nombre,
@@ -57,7 +56,7 @@ const login = async (req, res) => {
         direccion: AdministradorBDD.direccion,
         telefono: AdministradorBDD.telefono,
         _id: AdministradorBDD._id,
-        tokenJWT,
+        token,
         email: AdministradorBDD.email
     });
 };
@@ -97,20 +96,13 @@ const nuevoPassword = async (req, res) => {
 }
 
 const perfilAdministrador = (req, res) => {
-    if (req.AdministradorBDD && req.AdministradorBDD.token) {
-        delete req.AdministradorBDD.token;
-    }
-    res.status(200).json({
-        msg: "Información del Administrador autenticado",
-        Administrador: {
-            nombre: req.AdministradorBDD.nombre,
-            apellido: req.AdministradorBDD.apellido,
-            email: req.AdministradorBDD.email,
-            direccion: req.AdministradorBDD.direccion,
-            telefono: req.AdministradorBDD.telefono
-        }
-    });
-};
+    delete req.AdministradorBDD.token
+    delete req.AdministradorBDD.confirmEmail
+    delete req.AdministradorBDD.createdAt
+    delete req.AdministradorBDD.updatedAt
+    delete req.AdministradorBDD.__v
+    res.status(200).json(req.AdministradorBDD)
+}
 
 const actualizarPassword = async (req, res) => {
     const { email, passwordactual, passwordnuevo } = req.body;

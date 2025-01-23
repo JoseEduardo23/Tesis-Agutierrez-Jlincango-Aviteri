@@ -6,8 +6,8 @@ const router = Router()
 
 router.post('/usuario/registro',verificarAutenticacion, registrarUsuario)
 router.get('/usuarios',verificarAutenticacion, listarUsuarios)
-router.get('/usuario-detalle/:id',verificarAutenticacion,  detalleUsuario)
-router.put('/usuario-actualizar/:id',verificarAutenticacion, actualizarUsuario)
-router.delete('/usuario-eliminar/:id',verificarAutenticacion,  eliminarUsuario)
+router.get('/usuario/detalle/:id',verificarAutenticacion,  detalleUsuario)
+router.put('/usuario/actualizar/:id',verificarAutenticacion, actualizarUsuario)
+router.delete('/usuario/eliminar/:id',verificarAutenticacion,  eliminarUsuario)
 
 export default router

@@ -13,7 +13,7 @@ const verificarAutenticacion = async (req, res, next) => {
     const { authorization } = req.headers;
     try {
         const { id, rol } = jwt.verify(authorization.split(' ')[1], process.env.JWT_SECRET);
-        if (rol === "Administrador") {
+        if (rol==="Administrador") {
             req.AdministradorBDD = await Administrador.findById(id).lean().select("-password");
             next();
         }

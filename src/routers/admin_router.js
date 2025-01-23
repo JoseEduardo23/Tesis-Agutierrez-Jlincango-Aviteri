@@ -7,7 +7,7 @@ const router = Router()
 router.post("/register", registro)
 
 //Endpoint para confirmar el regitro
-router.get("/confirmar-token/:token", confirmEmail)
+router.get("/confirmar/:token", confirmEmail)
 
 //Endpoint para el inicio de sesion
 router.post("/login", login)
@@ -24,7 +24,7 @@ router.post("/nuevo-password/:token", nuevoPassword)
 
 
 //Endpoint para ver el perfil del usuario
-router.get('/perfil-admin',verificarAutenticacion, perfilAdministrador)
+router.get('/perfil',verificarAutenticacion, perfilAdministrador)
 
 //Endpoint para actualizar el perfil del usuario
 router.put('/perfil/:id',verificarAutenticacion, actualizarPerfil);
