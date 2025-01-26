@@ -4,10 +4,10 @@ import { verificarAutenticacion } from "../helpers/crearJWT.js";
 
 const router = Router();
 
-router.post("/", verificarAutenticacion, crearProducto);
-router.get("/", verificarAutenticacion, listarProductos);
-router.get("/:id", verificarAutenticacion, obtenerProductoPorId);
-router.put("/:id", verificarAutenticacion, actualizarProducto);
-router.delete("/:id", verificarAutenticacion, eliminarProducto);
+router.post("/crear/producto", verificarAutenticacion, crearProducto);
+router.get("/listar/productos", verificarAutenticacion, listarProductos);
+router.get("/detalle/producto/:id", verificarAutenticacion, obtenerProductoPorId);
+router.put("/actualizar/producto/:id", verificarAutenticacion, actualizarProducto);
+router.delete("/eliminar/producto/:id", verificarAutenticacion, eliminarProducto);
 
 export default router;

@@ -2,7 +2,7 @@ import Producto from "../models/product_model.js";
 import mongoose from 'mongoose';
 //
 const crearProducto = async (req, res) => {
-    const { nombre, descripcion, precio, stock, categoria, imagen } = req.body;
+    const { nombre, descripcion, precio, stock, categoria } = req.body;
 
     // Validar campos
     if (Object.values(req.body).includes("")) {
@@ -10,9 +10,9 @@ const crearProducto = async (req, res) => {
     }
 
     try {
-        const nuevoProducto = new Producto({ nombre, descripcion, precio, stock, categoria, imagen });
+        const nuevoProducto = new Producto({ nombre, descripcion, precio, stock, categoria });
         await nuevoProducto.save();
-        res.status(201).json({ msg: "Producto creado con éxito", producto: nuevoProducto });
+        res.status(200).json({ msg: "Producto creado con éxito", producto: nuevoProducto });
     } catch (error) {
         res.status(500).json({ msg: "Error al crear producto", error });
     }
@@ -21,11 +21,17 @@ const crearProducto = async (req, res) => {
 const listarProductos = async (req, res) => {
     try {
         const productos = await Producto.find();
-        res.status(200).json(productos);
+        
+        if (productos.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        return res.json(productos);
     } catch (error) {
-        res.status(500).json({ msg: "Error al obtener productos", error });
+        console.log(error);
+        return res.status(500).json({ msg: "Error al obtener productos", error });
     }
-};
+}
 
 const obtenerProductoPorId = async (req, res) => {
     const { id } = req.params;
@@ -36,6 +42,7 @@ const obtenerProductoPorId = async (req, res) => {
 
     try {
         const producto = await Producto.findById(id);
+        console.log("Producto",producto)
         if (!producto) {
             return res.status(404).json({ msg: "Producto no encontrado" });
         }
@@ -47,7 +54,7 @@ const obtenerProductoPorId = async (req, res) => {
 
 const actualizarProducto = async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, precio, stock, categoria,imagen } = req.body;
+    const { nombre, descripcion, precio, stock, categoria, } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ msg: "ID inválido" });
@@ -68,7 +75,6 @@ const actualizarProducto = async (req, res) => {
         producto.precio = precio || producto.precio;
         producto.stock = stock || producto.stock;
         producto.categoria = categoria || producto.categoria;
-        producto.imagen = imagen || producto.imagen; 
 
         await producto.save();
         res.status(200).json({ msg: "Producto actualizado con éxito", producto });

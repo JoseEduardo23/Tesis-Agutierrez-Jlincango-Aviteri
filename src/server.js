@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import adminrouter from './routers/admin_router.js';
 import userrouter from './routers/usuario_router.js';
+import productrouter from './routers/product_router.js'
 
 // Inicializaciones
 const app = express();
@@ -11,7 +12,11 @@ dotenv.config();
 
 // Configuraciones 
 app.set('port', process.env.PORT || 3000);
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods:['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders:['Content-Type','Authorization']
+}));
 
 // Middlewares 
 app.use(express.json());
@@ -26,6 +31,8 @@ app.use('/api', adminrouter);
 
 //Ruta de los usuarios 
 app.use('/api', userrouter);
+
+app.use('/api', productrouter)
 
 
 // Manejo de una ruta que no sea encontrada
