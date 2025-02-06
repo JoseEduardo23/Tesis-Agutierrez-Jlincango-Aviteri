@@ -23,7 +23,7 @@ const listarProductos = async (req, res) => {
         const productos = await Producto.find();
         
         if (productos.length === 0) {
-            return res.status(200).json([]);
+            return res.status(200).json({msg:"No hay productos registrados por el momento"});
         }
 
         return res.json(productos);

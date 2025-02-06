@@ -1,13 +1,19 @@
-import {Router} from 'express';
-import { verificarAutenticacion} from '../helpers/crearJWT.js';
-import { actualizarUsuario, detalleUsuario, eliminarUsuario, listarUsuarios, registrarUsuario } from '../controllers/usuario_controller.js';
+import { Router } from 'express';
+import { verificarAutenticacion } from '../helpers/crearJWT.js';
+import { registro, login, confirmEmail, recuperarPassword, comprobarTokenPasword, nuevoPassword, perfilUsuario, actualizarPassword, actualizarPerfil } from '../controllers/usuario_controller.js';
 
-const router = Router()
+const router = Router();
 
-router.post('/usuario/registro',verificarAutenticacion, registrarUsuario)
-router.get('/usuarios',verificarAutenticacion, listarUsuarios)
-router.get('/usuario/detalle/:id',verificarAutenticacion,  detalleUsuario)
-router.put('/usuario/actualizar/:id',verificarAutenticacion, actualizarUsuario)
-router.delete('/usuario/eliminar/:id',verificarAutenticacion,  eliminarUsuario)
+router.post('/usuario/registro', registro);
+router.post('/usuario/login', login);
+router.get('/usuario/confirmar/:token', confirmEmail);
 
-export default router
+router.post('/usuario/recuperar-password', recuperarPassword);
+router.get('/usuario/recuperar-password/:token', comprobarTokenPasword);
+router.post('/usuario/recuperar-password/:token', nuevoPassword);
+
+router.get('/usuario/perfil', verificarAutenticacion, perfilUsuario);
+router.put('/usuario/actualizar-perfil/:id', verificarAutenticacion, actualizarPerfil);
+router.put('/usuario/actualizar-password/:id', verificarAutenticacion, actualizarPassword);
+
+export default router;

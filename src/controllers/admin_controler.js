@@ -1,7 +1,7 @@
 import Administrador from "../models/admin_model.js";
 import mongoose from 'mongoose'
 import { sendMailToUser, sendMailToRecoveryPassword } from "../config/nodemailer.js";
-import { geenrarJWT } from "../helpers/crearJWT.js";
+import { generarJWT } from "../helpers/crearJWT.js";
 
 const registro = async (req, res) => {
     const { email, password } = req.body;
@@ -48,7 +48,7 @@ const login = async (req, res) => {
         return res.status(404).json({ msg: "Lo sentimos, la contraseña no es correcta" });
     }
 
-    const token = geenrarJWT(AdministradorBDD._id, "Administrador");
+    const token = generarJWT(AdministradorBDD._id, "Administrador");
 
     return res.status(200).json({
         nombre: AdministradorBDD.nombre,
