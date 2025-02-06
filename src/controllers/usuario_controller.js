@@ -151,6 +151,20 @@ const actualizarPerfil = async (req, res) => {
     res.status(200).json({ msg: "Perfil actualizado correctamente" });
 };
 
+const listarUsuarios = async (req, res) => {
+    const usuariosBDD = await Usuario.find().select("-password -__v -createdAt -updatedAt")
+    if (!usuariosBDD.length) return res.status(404).json({msg: "No se encontraron usuarios registrados."})
+    res.status(200).json(usuariosBDD)    
+}
+
+const eliminarUsuario = async (req, res) => {
+    const {id} = req.params
+    const usuario = await Usuario.findByIdAndDelete(id)
+    if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" })
+    res.status(200).json({ msg: "Usuario eliminado exitosamente" })
+    
+}
+
 export {
     registro,
     login,
@@ -160,5 +174,7 @@ export {
     nuevoPassword,
     perfilUsuario,
     actualizarPassword,
-    actualizarPerfil
+    actualizarPerfil,
+    listarUsuarios,
+    eliminarUsuario
 };

@@ -46,7 +46,7 @@ const usuarioSchema = new Schema({
   },
   confirmEmail: {
     type: Boolean,
-    default: null
+    default: false
   }
 },
   {
