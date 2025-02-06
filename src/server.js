@@ -20,7 +20,7 @@ app.use(express.json());
 
 // Rutas 
 app.get('/', (req, res) => {
-    res.send("Server on");
+    res.send("Servidor del sistema TIENDANIMAL 🐶🦴🏪🛒");
 });
 
 //Ruta de los administradores
