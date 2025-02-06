@@ -43,9 +43,7 @@ const detalleMascota = async (req, res) => {
 
     try {
         // Obtener los detalles de la mascota
-        const mascota = await Mascota.findById(id)
-            .select("-createdAt -updatedAt -__v")
-            .populate("usuario", "_id nombre apellido"); // Detalles del usuario propietario
+        const mascota = await Mascota.findById(id).select("-createdAt -updatedAt -__v").populate("usuario", "_id nombre apellido"); // Detalles del usuario propietario
 
         if (!mascota) {
             return res.status(404).json({ msg: "Mascota no encontrada." });
@@ -58,23 +56,6 @@ const detalleMascota = async (req, res) => {
     }
 };
 
-const obtenerMascotaPorId = async (req, res) => {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ msg: "ID inválido" });
-    }
-
-    try {
-        const mascota = await Mascota.findById(id);
-        if (!mascota) {
-            return res.status(404).json({ msg: "Mascota no encontrada" });
-        }
-        res.status(200).json(mascota);
-    } catch (error) {
-        res.status(500).json({ msg: "Error al obtener mascota", error });
-    }
-};
 
 const actualizarMascota = async (req, res) => {
     const { id } = req.params;
@@ -84,7 +65,7 @@ const actualizarMascota = async (req, res) => {
         return res.status(400).json({ msg: "ID inválido" });
     }
 
-    if (Object.values(req.body).some(valor => valor === "" || valor === undefined)) {
+    if (Object.values(req.body).includes("")) {
         return res.status(400).json({ msg: "Todos los campos son obligatorios" });
     }
 
@@ -126,7 +107,6 @@ export {
     registrarMascota,
     listarMascotas,
     detalleMascota,
-    obtenerMascotaPorId,
     actualizarMascota,
     eliminarMascota,
 };
