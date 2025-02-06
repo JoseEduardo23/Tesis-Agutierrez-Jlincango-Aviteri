@@ -49,3 +49,31 @@ SPRINT 0 📝
  ![image](https://github.com/user-attachments/assets/b41ce61c-39fd-4641-a738-1615fb7bcd30)
 
 
+ SPRINT 3 📝
+ 
+ •	Creación de endpoint para el registro de un producto.
+ 
+ •	Creación de endpoint para listar productos existentes.
+ 
+ •	Creación de endpoints para mostrar los detalles de un producto.
+ 
+ •	Creación de endpoints para actualizar un producto.
+ 
+ •	Creación de endpoints para eliminar un producto.
+
+![image](https://github.com/user-attachments/assets/e4821319-f7f1-4650-80be-b8e0e16884a6)
+
+
+SPRINT 4 📝
+
+ •	Pruebas.
+
+SPRINT 5 📝
+
+ •	Despliegue.
+
+ ![image](https://github.com/user-attachments/assets/beae881f-9fea-4b03-8cdb-5542afe5ba62)
+
+
+
+
