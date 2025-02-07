@@ -18,6 +18,7 @@ const registro = async (req, res) => {
 
 const confirmEmail = async (req, res) => {
     if (!(req.params.token)) return res.status(400).json({ msg: "Lo sentimos, no se puede validar la cuenta" });
+    console.log(req.params.token);  // Verifica que el token esté llegando
     const AdministradorBDD = await Administrador.findOne({ token:req.params.token});
     if (!AdministradorBDD?.token) return res.status(404).json({ msg: "La cuenta ya ha sido confirmada" });
     AdministradorBDD.token = null;
