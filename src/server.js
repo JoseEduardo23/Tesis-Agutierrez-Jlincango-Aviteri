@@ -32,12 +32,12 @@ app.get('/', (req, res) => {
     res.send("Servidor del sistema TIENDANIMAL 🐶🦴🏪🛒");
 });
 
-// Configuración para servir los archivos estáticos de React desde la carpeta "build"
-app.use(express.static(path.join(__dirname, 'client/build')));
+// Configuración para servir los archivos estáticos de React desde la carpeta "dist"
+app.use(express.static(path.join(__dirname, 'client/dist')));
 
-// Ruta para servir el index.html cuando no se encuentra una API o ruta
+// Ruta para servir el index.html cuando no se encuentra una ruta de API
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
 });
 
 // Manejo de rutas no encontradas (solo para la API)
