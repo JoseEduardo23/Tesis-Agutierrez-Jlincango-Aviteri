@@ -10,30 +10,24 @@ import { fileURLToPath } from 'url';
 
 // Inicializaciones
 const app = express();
-dotenv.config(); // Cargar variables de entorno
+dotenv.config();
 
 // Obtener la ruta del directorio actual
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuraciones
-app.set('port', process.env.PORT || 3001);
+app.set('port', process.env.PORT || 3000);
 
-// Configuración de CORS
-const URL_FRONTEND = process.env.URL_FRONTEND || 'http://localhost:5173'; // Asegurar un valor por defecto
+// Configuración CORS
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
 
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || origin === URL_FRONTEND) {
-            callback(null, true);
-        } else {
-            callback(new Error("CORS bloqueado"));
-        }
-    },
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true
-}));
-
+app.use(cors(corsOptions)); // Usar CORS con la configuración personalizada
 app.use(express.json());
 
 // Rutas de la API
