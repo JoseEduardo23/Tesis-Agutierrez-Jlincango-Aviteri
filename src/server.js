@@ -20,11 +20,16 @@ const __dirname = path.dirname(__filename);
 app.set('port', process.env.PORT || 3000);
 
 // Configuración de CORS
-const URL_FRONTEND = process.env.URL_FRONTEND || 'http://localhost:5173'; // URL por defecto para desarrollo
-console.log("Frontend permitido:", URL_FRONTEND);
+const URL_FRONTEND = process.env.URL_FRONTEND || 'http://localhost:5173'; // Asegurar un valor por defecto
 
 app.use(cors({
-    origin: URL_FRONTEND,
+    origin: (origin, callback) => {
+        if (!origin || origin === URL_FRONTEND) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS bloqueado"));
+        }
+    },
     methods: "GET,POST,PUT,DELETE",
     credentials: true
 }));
