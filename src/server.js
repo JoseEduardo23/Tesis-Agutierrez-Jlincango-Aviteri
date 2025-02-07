@@ -17,11 +17,22 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuraciones
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3001);
 
 // Configuración de CORS
-app.use(cors());
+const URL_FRONTEND = process.env.URL_FRONTEND || 'http://localhost:5173'; // Asegurar un valor por defecto
 
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || origin === URL_FRONTEND) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS bloqueado"));
+        }
+    },
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true
+}));
 
 app.use(express.json());
 
