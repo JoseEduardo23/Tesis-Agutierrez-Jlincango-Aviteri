@@ -1,10 +1,12 @@
 import {Router} from 'express'
 import { comprobarTokenPasword, confirmEmail, login, nuevoPassword, recuperarPassword, registro,actualizarPassword, actualizarPerfil, perfilAdministrador} from '../controllers/admin_controler.js'
 import { verificarAutenticacion } from '../helpers/crearJWT.js'
+import { validacionUsers } from '../middlewares/users_validations.js'
+
 const router = Router()
 
 //Endpoint para el registro
-router.post("/register", registro)
+router.post("/register", validacionUsers, registro)
 
 //Endpoint para confirmar el regitro
 router.get("/confirmar/:token", confirmEmail)
