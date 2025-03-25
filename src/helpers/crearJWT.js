@@ -35,4 +35,3 @@ export {
     verificarAutenticacion,
     generarJWT
 }
-
