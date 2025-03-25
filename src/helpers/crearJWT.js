@@ -21,7 +21,6 @@ const verificarAutenticacion = async (req, res, next) => {
             next();
         } else {
             req.UsuarioBDD = await Usuario.findById(id).lean().select("-password");
-            //console.log(req.UsuarioBDD);
             next();
         }
     } catch (error) {
