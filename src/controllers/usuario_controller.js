@@ -65,8 +65,6 @@ const login = async (req, res) => {
         telefono: usuarioBDD.telefono,
         _id: usuarioBDD._id,
         token,
-        rol: "Usuario",
-        email: usuarioBDD.email
     });
 };
 

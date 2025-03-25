@@ -59,7 +59,6 @@ const login = async (req, res) => {
         telefono: AdministradorBDD.telefono,
         _id: AdministradorBDD._id,
         token,
-        rol: "Administrador",
         email: AdministradorBDD.email
     });
 };
