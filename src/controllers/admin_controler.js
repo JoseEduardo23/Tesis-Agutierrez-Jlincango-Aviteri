@@ -31,26 +31,25 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (Object.values(req.body).includes("")) {
-        return res.status(400).json({ msg: "Debes llenar todos los campos" });
+        return res.status(404).json({ msg: "Debes llenar todos los campos" });
     }
 
     const AdministradorBDD = await Administrador.findOne({ email }).select("-status -__v -token -updatedAt -createdAt");
+
+    if (AdministradorBDD?.confirmEmail === false) {
+        return res.status(403).json({ msg: "Debe verificar su cuenta" });
+    }
 
     if (!AdministradorBDD) {
         return res.status(404).json({ msg: "El Administrador no se encuentra registrado" });
     }
 
-    if (AdministradorBDD.confirmEmail === false) {
-        return res.status(403).json({ msg: "Debe verificar su cuenta" });
-    }
-
     const verificarPassword = await AdministradorBDD.matchPassword(password);
     if (!verificarPassword) {
-        return res.status(401).json({ msg: "Lo sentimos, la contraseña no es correcta" });
+        return res.status(404).json({ msg: "Lo sentimos, la contraseña no es correcta" });
     }
 
-    // Generar el token con el rol
-    const token = generarJWT(AdministradorBDD._id, "admin");  
+    const token = generarJWT(AdministradorBDD._id, "Administrador");
 
     return res.status(200).json({
         nombre: AdministradorBDD.nombre,
