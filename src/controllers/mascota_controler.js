@@ -34,27 +34,26 @@ const listarMascotas = async (req, res) => {
 
 // Método para ver los detalles de una mascota en particular
 const detalleMascota = async (req, res) => {
-    const { id } = req.params;
-
-    // Verificar si el ID es válido
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({ msg: `Lo sentimos, no existe la mascota con ID ${id}` });
-    }
-
-    try {
-        // Obtener los detalles de la mascota
-        const mascota = await Mascota.findById(id).select("-createdAt -updatedAt -__v").populate("usuario", "_id nombre apellido"); // Detalles del usuario propietario
-
-        if (!mascota) {
-            return res.status(404).json({ msg: "Mascota no encontrada." });
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ msg: "ID inválido" });
         }
-
-        return res.status(200).json(mascota);
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ msg: "Error al obtener los detalles de la mascota." });
-    }
-};
+    
+        try {
+            const mascota = await Mascota.findOne({ 
+                _id: id, 
+                usuario: req.UsuarioBDD._id
+            }).populate("usuario", "_id nombre apellido");
+    
+            if (!mascota) {
+                return res.status(403).json({ msg: "No tienes permisos para ver esta mascota" });
+            }
+    
+            res.status(200).json(mascota);
+        } catch (error) {
+            res.status(500).json({ msg: "Error al obtener la mascota" });
+        }
+    };
 
 
 const actualizarMascota = async (req, res) => {

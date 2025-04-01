@@ -6,7 +6,7 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const generarJWT = (id, rol) =>{
-    return jwt.sign({id, rol},process.env.JWT_SECRET,{expiresIn:'3d'})
+    return jwt.sign({id, rol},process.env.JWT_SECRET,{expiresIn:'31d'})
 }
 const verificarAutenticacion = async (req, res, next) => {
     if (!req.headers.authorization) {
@@ -20,7 +20,7 @@ const verificarAutenticacion = async (req, res, next) => {
             req.AdministradorBDD = await Administrador.findById(id).lean().select("-password");
             next();
         } else {
-            req.UsuarioBDD = await Usuario.findById(id).lean().select("-password");
+            req.UsuarioBDD = await Usuario.findById(id).select("-password");
             next();
         }
     } catch (error) {
