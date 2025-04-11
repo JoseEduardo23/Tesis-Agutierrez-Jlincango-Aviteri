@@ -152,10 +152,32 @@ const actualizarPerfil = async (req, res) => {
 };
 
 const listarUsuarios = async (req, res) => {
-    const usuariosBDD = await Usuario.find().select("-password -__v -createdAt -updatedAt")
-    if (!usuariosBDD.length) return res.status(404).json({msg: "No se encontraron usuarios registrados."})
-    res.status(200).json(usuariosBDD)    
-}
+    try {
+        const usuariosBDD = await Usuario.find();
+        const ahora = new Date();
+
+        // Verificar y actualizar estado según el tiempo transcurrido
+        const actualizaciones = usuariosBDD.map(async (usuario) => {
+            const creado = new Date(usuario.createdAt);
+            const diasTranscurridos = (ahora - creado) / (1000 * 60 * 60 * 24);
+
+            if (diasTranscurridos > 31 && usuario.estado === true) {
+                usuario.estado = false;
+                await usuario.save();
+            }
+        });
+
+        await Promise.all(actualizaciones);
+
+        const usuariosActualizados = await Usuario.find().select("-password -__v -createdAt -updatedAt");
+        if (!usuariosActualizados.length) return res.status(404).json({ msg: "No se encontraron usuarios registrados." });
+
+        res.status(200).json(usuariosActualizados);
+    } catch (error) {
+        console.error("Error al listar usuarios:", error);
+        res.status(500).json({ msg: "Error al obtener los usuarios" });
+    }
+};
 
 const eliminarUsuario = async (req, res) => {
     const {id} = req.params
