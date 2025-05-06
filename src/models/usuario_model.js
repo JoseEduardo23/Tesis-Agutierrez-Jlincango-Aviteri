@@ -12,6 +12,14 @@ const usuarioSchema = new Schema({
     require: true,
     trim: true
   },
+  imagen:{
+    type: String,
+    trim: true, 
+  },
+  imagen_id:{
+    type: String,
+    trim: true, 
+  },
   rol: {
     type: String,
     default: "Usuario"

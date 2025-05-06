@@ -2,24 +2,39 @@ import Usuario from "../models/usuario_model.js";
 import mongoose from "mongoose";
 import { sendMailToUser, sendMailToRecoveryPassword } from "../config/nodemailer.js";
 import { generarJWT } from "../helpers/crearJWT.js";
+import cloudinary from "../config/cloudinary.js";
 
 const registro = async (req, res) => {
+    console.log(req.body);
     const { email, password } = req.body;
-    console.log(req.body)
     if (!email || !password) {
         return res.status(400).json({ msg: "Todos los campos son obligatorios" });
     }
-    const verificarEmailBDD = await Usuario.findOne({ email });
-    if (verificarEmailBDD) return res.status(400).json({ msg: "El email ya está registrado" });
-    const nuevoUser = new Usuario(req.body);
-    if (typeof password !== "string" || password.trim() === "") {
-        return res.status(400).json({ msg: "La contraseña no es válida" });
+    try {
+        const verificarEmailBDD = await Usuario.findOne({ email });
+        if (verificarEmailBDD) return res.status(400).json({ msg: "El email ya está registrado" });
+        let imagenurl = "";
+        let publicid = "";
+        if (req.file) {
+            imagenurl = req.file.path;
+            publicid = req.file.filename;
+        }
+        const nuevoUser = new Usuario({
+            ...req.body,
+            imagen: imagenurl,
+            imagen_id: publicid
+        });
+        if (typeof password !== "string" || password.trim() === "") {
+            return res.status(400).json({ msg: "La contraseña no es válida" });
+        }
+        nuevoUser.password = await nuevoUser.encriptarPassword(password);
+        const token = nuevoUser.crearToken();
+        await sendMailToUser(email, token);
+        await nuevoUser.save();
+        res.status(200).json({ nuevoUser, msg: "Registro exitoso, revisa tu correo" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al registrar el usuario", error: error.message });
     }
-    nuevoUser.password = await nuevoUser.encriptarPassword(password);
-    const token = nuevoUser.crearToken();
-    await sendMailToUser(email, token);
-    await nuevoUser.save();
-    res.status(200).json({ nuevoUser, msg: "Registro exitoso, revisa tu correo" });
 };
 
 
@@ -129,26 +144,38 @@ const actualizarPerfil = async (req, res) => {
         return res.status(400).json({ msg: "Todos los campos son obligatorios" });
     }
 
-    const usuarioBDD = await Usuario.findById(id);
-    if (!usuarioBDD) {
-        return res.status(404).json({ msg: `No existe un usuario con el ID: ${id}` });
-    }
-
-    if (usuarioBDD.email !== req.body.email) {
-        const usuarioBDDMail = await Usuario.findOne({ email: req.body.email });
-        if (usuarioBDDMail) {
-            return res.status(400).json({ msg: "El correo electrónico ya está registrado" });
+    try {
+        const usuarioBDD = await Usuario.findById(id);
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: `No existe un usuario con el ID: ${id}` });
         }
+
+        if (usuarioBDD.email !== req.body.email) {
+            const usuarioBDDMail = await Usuario.findOne({ email: req.body.email });
+            if (usuarioBDDMail) {
+                return res.status(400).json({ msg: "El correo electrónico ya está registrado" });
+            }
+        }
+        if (req.file) {
+            if (usuarioBDD.imagen_id) {
+                await cloudinary.uploader.destroy(usuarioBDD.imagen_id);
+            }
+            usuarioBDD.imagen = req.file.path;
+            usuarioBDD.imagen_id = req.file.filename;
+        }
+
+        usuarioBDD.nombre = req.body.nombre || usuarioBDD.nombre;
+        usuarioBDD.apellido = req.body.apellido || usuarioBDD.apellido;
+        usuarioBDD.direccion = req.body.direccion || usuarioBDD.direccion;
+        usuarioBDD.telefono = req.body.telefono || usuarioBDD.telefono;
+        usuarioBDD.email = req.body.email || usuarioBDD.email;
+
+        await usuarioBDD.save();
+        res.status(200).json({ msg: "Perfil actualizado correctamente" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al actualizar el perfil", error: error.message });
+
     }
-
-    usuarioBDD.nombre = req.body.nombre || usuarioBDD.nombre;
-    usuarioBDD.apellido = req.body.apellido || usuarioBDD.apellido;
-    usuarioBDD.direccion = req.body.direccion || usuarioBDD.direccion;
-    usuarioBDD.telefono = req.body.telefono || usuarioBDD.telefono;
-    usuarioBDD.email = req.body.email || usuarioBDD.email;
-
-    await usuarioBDD.save();
-    res.status(200).json({ msg: "Perfil actualizado correctamente" });
 };
 
 const listarUsuarios = async (req, res) => {
@@ -180,11 +207,18 @@ const listarUsuarios = async (req, res) => {
 };
 
 const eliminarUsuario = async (req, res) => {
-    const {id} = req.params
-    const usuario = await Usuario.findByIdAndDelete(id)
-    if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" })
-    res.status(200).json({ msg: "Usuario eliminado exitosamente" })
-    
+    const { id } = req.params
+    try {
+        const usuario = await Usuario.findByIdAndDelete(id)
+        if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" })
+        if (usuario.imagen_id) {
+            await cloudinary.uploader.destroy(usuario.imagen_id)
+        }
+        res.status(200).json({ msg: "Usuario eliminado exitosamente" })
+
+    } catch (error) {
+        res.status(500).json({ msg: "Error al eliminar el usuario", error: error.message }) ;
+    }
 }
 
 export {

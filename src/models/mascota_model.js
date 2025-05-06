@@ -7,6 +7,14 @@ const mascotaSchema = new Schema(
       required: true,
       trim: true,
     },
+    imagen:{
+      type: String,
+      trim: true, 
+    },
+    imagen_id:{
+      type: String,
+      trim: true, 
+    },
     raza: {
       type: String,
       required: true,

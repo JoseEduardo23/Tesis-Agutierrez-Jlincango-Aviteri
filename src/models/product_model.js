@@ -6,6 +6,14 @@ const productSchema = new Schema({
         required: true,
         trim: true,
     },
+    imagen:{
+        type: String,
+        trim: true, 
+      },
+    imagen_id:{
+        type: String,
+        trim: true, 
+      },
     descripcion: {
         type: String,
         trim: true,
@@ -22,6 +30,7 @@ const productSchema = new Schema({
         type: String,
         required: true,
         trim: true,
+        enum: ['Perros', 'Gatos', 'Aves', 'Peces', 'Otros'],
     }
 }, {
     timestamps: true,

@@ -25,7 +25,7 @@ export const validacionProducto = [
     .exists().withMessage('El campo "categoria" es obligatorio')
     .isString().withMessage('El campo "categoria" debe ser un texto')
     .trim()
-    .isLength({ min: 3, max: 50 }).withMessage('El campo "categoria" debe tener entre 3 y 50 caracteres'),
+    .isIn(['perros', 'gatos', 'peces', 'aves']).withMessage('El campo "categoria" debe ser uno de: perros, gatos, peces, aves'),
 
   // Middleware para manejar los errores de validación
   (req, res, next) => {

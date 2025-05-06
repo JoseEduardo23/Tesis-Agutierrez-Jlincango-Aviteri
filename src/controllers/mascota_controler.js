@@ -1,19 +1,31 @@
 import Mascota from "../models/mascota_model.js";
 import mongoose from 'mongoose';
+import cloudinary from "../config/cloudinary.js";
+
 
 const registrarMascota = async (req, res) => {
-
     if (Object.values(req.body).includes("")) {
         return res.status(400).json({ msg: "Todos los campos son obligatorios" });
     }
     try {
-        const nuevaMascota = new Mascota(req.body);
-        nuevaMascota.usuario = req.UsuarioBDD._id
+        let imagenurl = "";
+        let publicid = "";
+        if (req.file) {
+            imagenurl = req.file.path;
+            publicid = req.file.filename;
+        }
+
+        const nuevaMascota = new Mascota({
+            ...req.body,
+            imagen: imagenurl,
+            imagen_id: publicid,
+            usuario: req.UsuarioBDD._id
+        });
         await nuevaMascota.save();
         res.status(201).json({ msg: "Mascota creada con éxito", mascota: nuevaMascota });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ msg: "Error al crear mascota", error });
+        console.log(error);
+        res.status(500).json({ msg: "Error al crear mascota", error:error.message });
     }
 };
 
@@ -51,7 +63,7 @@ const detalleMascota = async (req, res) => {
     
             res.status(200).json(mascota);
         } catch (error) {
-            res.status(500).json({ msg: "Error al obtener la mascota" });
+            res.status(500).json({ msg: "Error al obtener la mascota", error:error.message });
         }
     };
 
@@ -69,16 +81,24 @@ const actualizarMascota = async (req, res) => {
     }
 
     try {
-        const mascota = await Mascota.findById(id);
+        const mascota = await Mascota.findById(id).findOne({ usuario: req.UsuarioBDD._id });
         if (!mascota) {
-            return res.status(404).json({ msg: "Mascota no encontrada" });
+            return res.status(403).json({ msg: "No tienes permisos para eliminar esta mascota o no se ha encontrado el registro" });
         }
-
+        // borro la anterior imagen de Cloudinary y guardo la nueva
+        if (req.file) {
+            if (mascota.imagen_id) {
+                 await cloudinary.uploader.destroy(mascota.imagen_id);
+            }
+            mascota.imagen = req.file.path;
+            mascota.imagen_id = req.file.filename;
+        }
         Object.assign(mascota, { nombre, raza, edad, actividad, peso });
         await mascota.save();
         res.status(200).json({ msg: "Mascota actualizada con éxito", mascota });
     } catch (error) {
-        res.status(500).json({ msg: "Error al actualizar mascota", error });
+        console.log(error);
+        res.status(500).json({ msg: "Error al actualizar mascota", error:error.message });
     }
 };
 
@@ -90,15 +110,18 @@ const eliminarMascota = async (req, res) => {
     }
 
     try {
-        const mascota = await Mascota.findById(id);
+        const mascota = await Mascota.findById(id).findOne({ usuario: req.UsuarioBDD._id });
         if (!mascota) {
-            return res.status(404).json({ msg: "Mascota no encontrada" });
+            return res.status(403).json({ msg: "No tienes permisos para eliminar esta mascota o no se ha encontrado el registro" });
         }
-
+        if (mascota.imagen_id) {
+             await cloudinary.uploader.destroy(mascota.imagen_id);
+        }
+        
         await mascota.deleteOne();
         res.status(200).json({ msg: "Mascota eliminada con éxito" });
     } catch (error) {
-        res.status(500).json({ msg: "Error al eliminar mascota", error });
+        res.status(500).json({ msg: "Error al eliminar mascota", error:error.message });
     }
 };
 
