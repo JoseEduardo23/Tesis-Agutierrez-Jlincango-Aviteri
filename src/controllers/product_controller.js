@@ -44,39 +44,42 @@ const registrarProducto = async (req, res) => {
             });
         }
 
-        // 4. Manejo de Cloudinary
         let imagenData = {};
         if (req.file) {
-            // Si usas el middleware de Cloudinary, los datos vienen en req.file
+            if (!req.file.secure_url || !req.file.public_id) {
+                throw new Error("Cloudinary no devolvió los datos esperados");
+            }
+
             imagenData = {
-                imagen: req.file.path,
-                imagen_id: req.file.filename
+                imagen: req.file.secure_url,
+                imagen_id: req.file.public_id
             };
         }
 
-        // 5. Crear producto
         const nuevoProducto = new Producto({
             nombre,
             descripcion,
             precio: Number(precio),
             stock: Number(stock),
-            categoria: categoriaNormalizada,
+            categoria: categoria.toLowerCase(),
             ...imagenData
         });
 
         await nuevoProducto.save();
 
-        // 6. Respuesta exitosa
         res.status(201).json({
             msg: "Producto creado con éxito",
             producto: nuevoProducto
         });
 
     } catch (error) {
-        console.error('Error en registrarProducto:', error);
-        res.status(500).json({
-            msg: "Error en el servidor",
-            error: process.env.NODE_ENV === 'development' ? error.message : null
+        console.error('Error detallado:', {
+            message: error.message,
+            stack: error.stack,
+            request: {
+                body: req.body,
+                file: req.file
+            }
         });
     }
 }
