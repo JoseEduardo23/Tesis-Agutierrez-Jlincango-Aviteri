@@ -16,12 +16,11 @@ const registrarProducto = async (req, res) => {
       return res.status(400).json({ msg: "Faltan campos obligatorios" });
     }
 
-    // Verifica si el archivo se recibió correctamente
     let imagenData = {};
     if (req.file) {
       console.log("Datos de Cloudinary:", {
-        secure_url: req.file.secure_url,
-        public_id: req.file.public_id
+        secure_url: req.file.path,
+        public_id: req.file.filename
       });
 
       if (!req.file.secure_url) {
