@@ -25,7 +25,7 @@ export const validacionProducto = [
     .exists().withMessage('El campo "categoria" es obligatorio')
     .isString().withMessage('El campo "categoria" debe ser un texto')
     .trim()
-    .isIn(['perros', 'gatos', 'peces', 'aves']).withMessage('El campo "categoria" debe ser uno de: perros, gatos, peces, aves'),
+    .isIn(['Perros', 'Gatos', 'Peces', 'Aves']).withMessage('El campo "categoria" debe ser uno de: perros, gatos, peces, aves'),
 
   // Middleware para manejar los errores de validación
   (req, res, next) => {

@@ -17,7 +17,7 @@ const registrarProducto = async (req, res) => {
             return res.status(400).json({ msg: "El producto ya existe" });
         }
 
-        const categoriasValidas = ["Perros", "Gatos", "Peces", "Aves", "Otros"];
+        const categoriasValidas = ["Perros", "Gatos", "Peces", "Aves"];
         if (!categoriasValidas.includes(categoria)) {
             return res.status(400).json({ msg: "Categoría inválida" });
         }
