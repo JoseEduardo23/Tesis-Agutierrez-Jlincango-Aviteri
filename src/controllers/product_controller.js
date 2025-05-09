@@ -47,8 +47,8 @@ const registrarProducto = async (req, res) => {
         if (req.file) {
             // Si usas el middleware de Cloudinary, los datos vienen en req.file
             imagenData = {
-                imagen: req.file.secure_url,    // URL segura de Cloudinary
-                imagen_id: req.file.public_id   // ID público de Cloudinary
+                imagen: req.file.path,    
+                imagen_id: req.file.filename 
             };
         }
 
