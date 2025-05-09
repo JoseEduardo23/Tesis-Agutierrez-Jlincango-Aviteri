@@ -2,7 +2,7 @@ import Producto from "../models/product_model.js";
 import mongoose from 'mongoose';
 import cloudinary from "../config/cloudinary.js";
 
-onst registrarProducto = async (req, res) => {
+const registrarProducto = async (req, res) => {
   console.log("Datos recibidos en backend:", {
     body: req.body,
     file: req.file // Verifica esto especialmente
