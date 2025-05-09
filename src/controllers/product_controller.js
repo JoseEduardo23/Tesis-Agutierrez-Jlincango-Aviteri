@@ -25,7 +25,7 @@ const registrarProducto = async (req, res) => {
         let imagenurl = ""
         let publicid = ""
         if (req.file) {
-            imagenurl = req.file.path;
+            imagenurl = req.file.source_url;
             publicid = req.file.filename;
         }
 
@@ -34,7 +34,7 @@ const registrarProducto = async (req, res) => {
         await nuevoProducto.save();
         res.status(200).json({ msg: "Producto creado con éxito", producto: nuevoProducto });
     } catch (error) {
-        res.status(500).json({ msg: "Error al crear producto", error:error.mesage });
+        res.status(500).json({ msg: "Error al crear producto", error:error.message });
     }
 };
 
@@ -49,7 +49,7 @@ const listarProductos = async (req, res) => {
         return res.json(productos);
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ msg: "Error al obtener productos", error:error.mesage });
+        return res.status(500).json({ msg: "Error al obtener productos", error:error.message });
     }
 }
 
@@ -67,7 +67,7 @@ const obtenerProductoPorId = async (req, res) => {
         }
         res.status(200).json(producto);
     } catch (error) {
-        res.status(500).json({ msg: "Error al obtener producto", error:error.mesage });
+        res.status(500).json({ msg: "Error al obtener producto", error:error.message });
     }
 };
 
@@ -93,7 +93,7 @@ const actualizarProducto = async (req, res) => {
             if (producto.imagen_id) {
                 await cloudinary.uploader.destroy(producto.imagen_id);
             }
-            producto.imagen = req.file.path;
+            producto.imagen = req.file.source_url;
             producto.imagen_id = req.file.filename;
         }
 
@@ -106,7 +106,7 @@ const actualizarProducto = async (req, res) => {
         await producto.save();
         res.status(200).json({ msg: "Producto actualizado con éxito", producto });
     } catch (error) {
-        res.status(500).json({ msg: "Error al actualizar producto", error:error.mesage });
+        res.status(500).json({ msg: "Error al actualizar producto", error:error.message });
     }
 };
 
@@ -129,7 +129,7 @@ const eliminarProducto = async (req, res) => {
         await producto.deleteOne();
         res.status(200).json({ msg: "Producto eliminado con éxito" });
     } catch (error) {
-        res.status(500).json({ msg: "Error al eliminar producto", error:error.mesage });
+        res.status(500).json({ msg: "Error al eliminar producto", error:error.message });
     }
 };
 
