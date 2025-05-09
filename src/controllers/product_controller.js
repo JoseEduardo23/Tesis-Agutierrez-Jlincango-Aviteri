@@ -5,7 +5,7 @@ import cloudinary from "../config/cloudinary.js";
 const registrarProducto = async (req, res) => {
   console.log("Datos recibidos en backend:", {
     body: req.body,
-    file: req.file // Verifica esto especialmente
+    file: req.file
   });
 
   try {
