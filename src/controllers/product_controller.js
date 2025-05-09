@@ -5,38 +5,79 @@ import cloudinary from "../config/cloudinary.js";
 const registrarProducto = async (req, res) => {
     const { nombre, descripcion, precio, stock, categoria } = req.body;
 
-    // Validar campos
-    if (Object.values(req.body).includes("")) {
-        return res.status(400).json({ msg: "Todos los campos son obligatorios" });
-    }
-
     try {
-        // Verificar si el producto ya existe
-        const productoExistente = await Producto.findOne({ nombre });
+        // 1. Validar campos requeridos
+        const camposRequeridos = { nombre, precio, stock, categoria };
+        const camposFaltantes = Object.entries(camposRequeridos)
+            .filter(([_, value]) => !value)
+            .map(([key]) => key);
+
+        if (camposFaltantes.length > 0) {
+            return res.status(400).json({ 
+                msg: "Campos obligatorios faltantes",
+                campos: camposFaltantes 
+            });
+        }
+
+        // 2. Validar categoría (insensible a mayúsculas)
+        const categoriasValidas = ["perros", "gatos", "peces", "aves"];
+        const categoriaNormalizada = categoria.toLowerCase();
+        
+        if (!categoriasValidas.includes(categoriaNormalizada)) {
+            return res.status(400).json({ 
+                msg: "Categoría inválida",
+                categoriasValidas 
+            });
+        }
+
+        // 3. Verificar producto existente
+        const productoExistente = await Producto.findOne({ 
+            nombre: { $regex: new RegExp(nombre, 'i') } 
+        });
+        
         if (productoExistente) {
-            return res.status(400).json({ msg: "El producto ya existe" });
+            return res.status(400).json({ 
+                msg: "El producto ya existe",
+                productoExistente: productoExistente.nombre 
+            });
         }
 
-        const categoriasValidas = ["Perros", "Gatos", "Peces", "Aves"];
-        if (!categoriasValidas.includes(categoria)) {
-            return res.status(400).json({ msg: "Categoría inválida" });
-        }
-
-        let imagenurl = ""
-        let publicid = ""
+        // 4. Manejo de Cloudinary
+        let imagenData = {};
         if (req.file) {
-            imagenurl = req.file.source_url;
-            publicid = req.file.filename;
+            // Si usas el middleware de Cloudinary, los datos vienen en req.file
+            imagenData = {
+                imagen: req.file.secure_url,    // URL segura de Cloudinary
+                imagen_id: req.file.public_id   // ID público de Cloudinary
+            };
         }
 
-        const nuevoProducto = new Producto({ nombre, descripcion, precio, stock, categoria, imagen: imagenurl, imagen_id: publicid});
+        // 5. Crear producto
+        const nuevoProducto = new Producto({ 
+            nombre,
+            descripcion,
+            precio: Number(precio),
+            stock: Number(stock),
+            categoria: categoriaNormalizada,
+            ...imagenData
+        });
 
         await nuevoProducto.save();
-        res.status(200).json({ msg: "Producto creado con éxito", producto: nuevoProducto });
+
+        // 6. Respuesta exitosa
+        res.status(201).json({ 
+            msg: "Producto creado con éxito",
+            producto: nuevoProducto
+        });
+
     } catch (error) {
-        res.status(500).json({ msg: "Error al crear producto", error:error.message });
+        console.error('Error en registrarProducto:', error);
+        res.status(500).json({ 
+            msg: "Error en el servidor",
+            error: process.env.NODE_ENV === 'development' ? error.message : null
+        });
     }
-};
+}
 
 const listarProductos = async (req, res) => {
     try {
