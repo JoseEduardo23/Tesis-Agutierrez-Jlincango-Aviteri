@@ -2,87 +2,62 @@ import Producto from "../models/product_model.js";
 import mongoose from 'mongoose';
 import cloudinary from "../config/cloudinary.js";
 
-const registrarProducto = async (req, res) => {
-    console.log("Archivo recibido:", req.file);  // Verifica si el archivo llega
-    console.log("Cuerpo de la solicitud:", req.body);
+onst registrarProducto = async (req, res) => {
+  console.log("Datos recibidos en backend:", {
+    body: req.body,
+    file: req.file // Verifica esto especialmente
+  });
+
+  try {
     const { nombre, descripcion, precio, stock, categoria } = req.body;
 
-    try {
-        // 1. Validar campos requeridos
-        const camposRequeridos = { nombre, precio, stock, categoria };
-        const camposFaltantes = Object.entries(camposRequeridos)
-            .filter(([_, value]) => !value)
-            .map(([key]) => key);
-
-        if (camposFaltantes.length > 0) {
-            return res.status(400).json({
-                msg: "Campos obligatorios faltantes",
-                campos: camposFaltantes
-            });
-        }
-
-        // 2. Validar categoría (insensible a mayúsculas)
-        const categoriasValidas = ["perros", "gatos", "peces", "aves"];
-        const categoriaNormalizada = categoria.toLowerCase();
-
-        if (!categoriasValidas.includes(categoriaNormalizada)) {
-            return res.status(400).json({
-                msg: "Categoría inválida",
-                categoriasValidas
-            });
-        }
-
-        // 3. Verificar producto existente
-        const productoExistente = await Producto.findOne({
-            nombre: { $regex: new RegExp(nombre, 'i') }
-        });
-
-        if (productoExistente) {
-            return res.status(400).json({
-                msg: "El producto ya existe",
-                productoExistente: productoExistente.nombre
-            });
-        }
-
-        let imagenData = {};
-        if (req.file) {
-            if (!req.file.secure_url || !req.file.public_id) {
-                throw new Error("Cloudinary no devolvió los datos esperados");
-            }
-
-            imagenData = {
-                imagen: req.file.secure_url,
-                imagen_id: req.file.public_id
-            };
-        }
-
-        const nuevoProducto = new Producto({
-            nombre,
-            descripcion,
-            precio: Number(precio),
-            stock: Number(stock),
-            categoria: categoria.toLowerCase(),
-            ...imagenData
-        });
-
-        await nuevoProducto.save();
-
-        res.status(201).json({
-            msg: "Producto creado con éxito",
-            producto: nuevoProducto
-        });
-
-    } catch (error) {
-        console.error('Error detallado:', {
-            message: error.message,
-            stack: error.stack,
-            request: {
-                body: req.body,
-                file: req.file
-            }
-        });
+    // Validación básica
+    if (!nombre || !precio || !stock || !categoria) {
+      return res.status(400).json({ msg: "Faltan campos obligatorios" });
     }
-}
+
+    // Verifica si el archivo se recibió correctamente
+    let imagenData = {};
+    if (req.file) {
+      console.log("Datos de Cloudinary:", {
+        secure_url: req.file.secure_url,
+        public_id: req.file.public_id
+      });
+
+      if (!req.file.secure_url) {
+        throw new Error("Cloudinary no devolvió URL válida");
+      }
+
+      imagenData = {
+        imagen: req.file.secure_url,
+        imagen_id: req.file.public_id
+      };
+    }
+
+    const nuevoProducto = new Producto({
+      nombre,
+      descripcion,
+      precio: Number(precio),
+      stock: Number(stock),
+      categoria: categoria.toLowerCase(),
+      ...imagenData
+    });
+
+    await nuevoProducto.save();
+
+    res.status(201).json({
+      msg: "Producto creado con éxito",
+      producto: nuevoProducto
+    });
+
+  } catch (error) {
+    console.error("Error detallado en backend:", error);
+    res.status(500).json({
+      msg: "Error al crear producto",
+      error: error.message
+    });
+  }
+};
 
 const listarProductos = async (req, res) => {
     try {
