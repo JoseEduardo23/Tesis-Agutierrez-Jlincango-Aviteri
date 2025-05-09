@@ -30,7 +30,7 @@ const productSchema = new Schema({
         type: String,
         required: true,
         trim: true,
-        enum: ['perros', 'gatos', 'aves', 'peces', 'otros'],
+        enum: [],
     }
 }, {
     timestamps: true,
