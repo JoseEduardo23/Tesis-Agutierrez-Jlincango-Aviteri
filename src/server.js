@@ -22,7 +22,7 @@ app.set('port', process.env.PORT || 3000);
 
 // Configuración CORS
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: process.env.URL_FRONTEND,
   methods: ['GET', 'POST', 'PUT', 'DELETE'], 
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
