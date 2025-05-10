@@ -3,59 +3,44 @@ import { Schema, model } from 'mongoose';
 const productSchema = new Schema({
     nombre: {
         type: String,
-        required: [true, 'El nombre es obligatorio'],
-        trim: true,
-        maxlength: [100, 'El nombre no puede exceder 100 caracteres']
+        required: true,
+        trim: true
     },
     imagen: {
         type: {
-            url: {
-                type: String,
-                required: false
-            },
-            public_id: {
-                type: String,
-                required: false
-            },
+            url: String,
+            public_id: String,
             width: Number,
             height: Number, 
             format: String    
         },
-        required: false,
         _id: false 
     },
     descripcion: {
         type: String,
-        trim: true,
-        maxlength: [500, 'La descripción no puede exceder 500 caracteres']
+        trim: true
     },
     precio: {
         type: Number,
-        required: [true, 'El precio es obligatorio'],
-        min: [0, 'El precio no puede ser negativo'],
-        set: v => parseFloat(v.toFixed(2)) 
+        required: true,
+        min: 0
     },
     stock: {
         type: Number,
-        required: [true, 'El stock es obligatorio'],
-        min: [0, 'El stock no puede ser negativo'],
+        required: true,
+        min: 0,
         default: 0
     },
     categoria: {
         type: String,
-        required: [true, 'La categoría es obligatoria'],
+        required: true,
         trim: true,
-        enum: {
-            values: ['Perros', 'Gatos', 'Peces', 'Aves'],
-            message: 'Categoría no válida. Valores permitidos: {VALUE}'
-        },
         lowercase: true
     }
 }, {
     timestamps: true,
-    versionKey: false, 
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true } 
+    versionKey: false
 });
+
 
 export default model('Producto', productSchema);

@@ -3,12 +3,30 @@ import mongoose from 'mongoose';
 import ImageService from "../services/imageService.js";
 import fs from 'fs-extra'
 
+const handleImageUpload = async (file, existingPublicId = null) => {
+  if (!file) return null;
+  
+  try {
+    await fs.access(file.path);
+    const result = existingPublicId 
+      ? await ImageService.updateImage(existingPublicId, file.path, "productos", { width: 800, crop: "scale" })
+      : await ImageService.uploadImage(file.path, "productos", { width: 800, crop: "scale" });
+    
+    await fs.unlink(file.path);
+    return result;
+  } catch (error) {
+    await fs.unlink(file.path).catch(() => {});
+    throw error;
+  }
+};
+
 const registrarProducto = async (req, res) => {
   try {
     const { nombre, descripcion, precio, stock, categoria } = req.body;
 
-    // Validación mejorada
+    // Validación básica
     if (!nombre || !precio || !stock || !categoria) {
+      if (req.file) await fs.unlink(req.file.path).catch(() => {});
       return res.status(400).json({ 
         success: false,
         message: "Faltan campos obligatorios",
@@ -21,22 +39,7 @@ const registrarProducto = async (req, res) => {
       });
     }
 
-    let imagenData = {};
-    if (req.file) {
-      try {
-        imagenData.imagen = await ImageService.uploadImage(
-          req.file.path,
-          "productos",
-          { width: 800, crop: "scale" }
-        );
-      } catch (error) {
-        return res.status(500).json({
-          success: false,
-          message: "Error al procesar la imagen",
-          error: error.message
-        });
-      }
-    }
+    const imagen = await handleImageUpload(req.file);
 
     const nuevoProducto = new Producto({
       nombre,
@@ -44,7 +47,7 @@ const registrarProducto = async (req, res) => {
       precio: Number(precio),
       stock: Number(stock),
       categoria: categoria.toLowerCase(),
-      ...imagenData
+      imagen
     });
 
     await nuevoProducto.save();
@@ -52,22 +55,16 @@ const registrarProducto = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Producto creado exitosamente",
-      data: {
-        _id: nuevoProducto._id,
-        nombre: nuevoProducto.nombre,
-        imagen: nuevoProducto.imagen,
-        descripcion: nuevoProducto.descripcion,
-        precio: nuevoProducto.precio,
-        stock: nuevoProducto.stock,
-        categoria: nuevoProducto.categoria
-      }
+      data: nuevoProducto.toObject({ getters: true, versionKey: false })
     });
 
   } catch (error) {
     console.error("Error en registrarProducto:", error);
+    if (req.file) await fs.unlink(req.file.path).catch(() => {});
+    
     res.status(500).json({
       success: false,
-      message: "Error interno al crear el producto",
+      message: "Error al crear producto",
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -75,169 +72,156 @@ const registrarProducto = async (req, res) => {
 
 const listarProductos = async (req, res) => {
   try {
-    const { categoria } = req.query;
+    const { categoria, page = 1, limit = 10 } = req.query;
     const filtro = categoria ? { categoria: categoria.toLowerCase() } : {};
+    
+    const options = {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sort: { createdAt: -1 },
+      select: '-__v -updatedAt'
+    };
 
-    const productos = await Producto.find(filtro)
-      .sort({ createdAt: -1 })
-      .select('-__v -updatedAt');
+    const result = await Producto.paginate(filtro, options);
 
-    if (productos.length === 0) {
-      return res.status(200).json({ 
-        msg: "No hay productos registrados",
-        filtro: categoria ? `Categoría: ${categoria}` : null
-      });
-    }
-
-    res.status(200).json(productos);
+    res.status(200).json({
+      success: true,
+      data: {
+        productos: result.docs,
+        total: result.totalDocs,
+        pages: result.totalPages,
+        currentPage: result.page
+      }
+    });
   } catch (error) {
     console.error("Error en listarProductos:", error);
     res.status(500).json({ 
-      msg: "Error al obtener productos", 
-      error: error.message 
+      success: false,
+      message: "Error al obtener productos",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
 
 const obtenerProductoPorId = async (req, res) => {
-  const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ 
-      msg: "ID inválido",
-      idRecibido: id 
-    });
-  }
-
   try {
-    const producto = await Producto.findById(id).select('-__v -updatedAt');
-
-    if (!producto) {
-      return res.status(404).json({ 
-        msg: "Producto no encontrado",
-        idBuscado: id 
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: "ID de producto inválido"
       });
     }
 
-    res.status(200).json(producto);
+    const producto = await Producto.findById(req.params.id).select('-__v -updatedAt');
+    if (!producto) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Producto no encontrado"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: producto
+    });
   } catch (error) {
     console.error("Error en obtenerProductoPorId:", error);
     res.status(500).json({ 
-      msg: "Error al obtener producto", 
-      error: error.message 
+      success: false,
+      message: "Error al obtener producto",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
 
 const actualizarProducto = async (req, res) => {
-  const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ 
-      msg: "ID inválido",
-      idRecibido: id 
-    });
-  }
-
   try {
-    const producto = await Producto.findById(id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      if (req.file) await fs.unlink(req.file.path).catch(() => {});
+      return res.status(400).json({ 
+        success: false,
+        message: "ID de producto inválido"
+      });
+    }
+
+    const producto = await Producto.findById(req.params.id);
     if (!producto) {
+      if (req.file) await fs.unlink(req.file.path).catch(() => {});
       return res.status(404).json({ 
-        msg: "Producto no encontrado",
-        idBuscado: id 
+        success: false,
+        message: "Producto no encontrado"
       });
     }
 
     // Manejo de imagen
     if (req.file) {
-      try {
-        producto.imagen = await ImageService.updateImage(
-          producto.imagen?.public_id,
-          req.file.path,
-          "productos",
-          { width: 800, crop: "scale" }
-        );
-      } catch (error) {
-        return res.status(500).json({ 
-          msg: "Error al actualizar la imagen del producto", 
-          error: error.message 
-        });
-      }
+      producto.imagen = await handleImageUpload(req.file, producto.imagen?.public_id);
     }
 
-    // Actualizar otros campos
-    if (req.body.nombre) producto.nombre = req.body.nombre;
-    if (req.body.descripcion !== undefined) producto.descripcion = req.body.descripcion;
-    if (req.body.precio) producto.precio = Number(req.body.precio);
-    if (req.body.stock) producto.stock = Number(req.body.stock);
-    if (req.body.categoria) producto.categoria = req.body.categoria.toLowerCase();
+    // Actualizar campos
+    const { nombre, descripcion, precio, stock, categoria } = req.body;
+    if (nombre) producto.nombre = nombre;
+    if (descripcion !== undefined) producto.descripcion = descripcion;
+    if (precio) producto.precio = Number(precio);
+    if (stock) producto.stock = Number(stock);
+    if (categoria) producto.categoria = categoria.toLowerCase();
 
     await producto.save();
     
-    res.status(200).json({ 
-      msg: "Producto actualizado con éxito",
-      producto: {
-        _id: producto._id,
-        nombre: producto.nombre,
-        imagen: producto.imagen,
-        descripcion: producto.descripcion,
-        precio: producto.precio,
-        stock: producto.stock,
-        categoria: producto.categoria,
-        updatedAt: producto.updatedAt
-      }
+    res.status(200).json({
+      success: true,
+      message: "Producto actualizado con éxito",
+      data: producto.toObject({ getters: true, versionKey: false })
     });
   } catch (error) {
     console.error("Error en actualizarProducto:", error);
+    if (req.file) await fs.unlink(req.file.path).catch(() => {});
+    
     res.status(500).json({ 
-      msg: "Error al actualizar producto", 
-      error: error.message 
+      success: false,
+      message: "Error al actualizar producto",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
 
 const eliminarProducto = async (req, res) => {
-  const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ 
-      msg: "ID inválido",
-      idRecibido: id 
-    });
-  }
-
   try {
-    const producto = await Producto.findById(id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: "ID de producto inválido"
+      });
+    }
+
+    const producto = await Producto.findById(req.params.id);
     if (!producto) {
       return res.status(404).json({ 
-        msg: "Producto no encontrado",
-        idBuscado: id 
+        success: false,
+        message: "Producto no encontrado"
       });
     }
 
     // Eliminar imagen si existe
     if (producto.imagen?.public_id) {
-      try {
-        await ImageService.deleteImage(producto.imagen.public_id);
-      } catch (error) {
-        console.error("Error al eliminar imagen:", error);
-      }
+      await ImageService.deleteImage(producto.imagen.public_id).catch(error => {
+        console.error("Error al eliminar imagen de Cloudinary:", error);
+      });
     }
 
     await producto.deleteOne();
     
-    res.status(200).json({ 
-      msg: "Producto eliminado con éxito",
-      productoEliminado: {
-        _id: producto._id,
-        nombre: producto.nombre
-      }
+    res.status(200).json({
+      success: true,
+      message: "Producto eliminado con éxito",
+      data: { _id: producto._id }
     });
   } catch (error) {
     console.error("Error en eliminarProducto:", error);
     res.status(500).json({ 
-      msg: "Error al eliminar producto", 
-      error: error.message 
+      success: false,
+      message: "Error al eliminar producto",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
