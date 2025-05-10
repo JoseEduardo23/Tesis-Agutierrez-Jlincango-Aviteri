@@ -1,6 +1,7 @@
 import Producto from "../models/product_model.js";
 import mongoose from 'mongoose';
 import ImageService from "../services/imageService.js";
+import fs from 'fs-extra'
 
 const registrarProducto = async (req, res) => {
   try {
@@ -9,8 +10,9 @@ const registrarProducto = async (req, res) => {
     // Validación mejorada
     if (!nombre || !precio || !stock || !categoria) {
       return res.status(400).json({ 
-        msg: "Faltan campos obligatorios",
-        camposFaltantes: {
+        success: false,
+        message: "Faltan campos obligatorios",
+        missingFields: {
           nombre: !nombre,
           precio: !precio,
           stock: !stock,
@@ -29,7 +31,8 @@ const registrarProducto = async (req, res) => {
         );
       } catch (error) {
         return res.status(500).json({
-          msg: "Error al subir la imagen del producto",
+          success: false,
+          message: "Error al procesar la imagen",
           error: error.message
         });
       }
@@ -47,8 +50,9 @@ const registrarProducto = async (req, res) => {
     await nuevoProducto.save();
 
     res.status(201).json({
-      msg: "Producto creado con éxito",
-      producto: {
+      success: true,
+      message: "Producto creado exitosamente",
+      data: {
         _id: nuevoProducto._id,
         nombre: nuevoProducto.nombre,
         imagen: nuevoProducto.imagen,
@@ -62,8 +66,9 @@ const registrarProducto = async (req, res) => {
   } catch (error) {
     console.error("Error en registrarProducto:", error);
     res.status(500).json({
-      msg: "Error al crear producto",
-      error: error.message
+      success: false,
+      message: "Error interno al crear el producto",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
