@@ -1,14 +1,41 @@
 import { Router } from "express";
 import { registrarProducto, listarProductos, obtenerProductoPorId, actualizarProducto, eliminarProducto, } from "../controllers/product_controller.js";
-import { verificarAutenticacion } from "../helpers/crearJWT.js";
+import { verificarAutenticacion, verificarRolAdmin } from "../helpers/crearJWT.js";
 import { validacionProducto } from "../middlewares/productos_validations.js";
-import { uploadProductos } from "../middlewares/upload_cloudinary.js"
+import uploadErrorHandler from "../middlewares/uploadErrorHandler.js";
+import uploadProductImage from "../config/uploadProductImages.js";
+
 const router = Router();
 
-router.post("/crear/producto", verificarAutenticacion,uploadProductos.single("imagen"),validacionProducto, registrarProducto);
+// Crear producto (manteniendo ruta original)
+router.post("/crear/producto",
+  verificarAutenticacion,
+  verificarRolAdmin,
+  uploadProductImage,
+  uploadErrorHandler,
+  validacionProducto,
+  registrarProducto
+);
+
 router.get("/listar/productos", listarProductos);
-router.get("/detalle/producto/:id", verificarAutenticacion, obtenerProductoPorId);
-router.put("/actualizar/producto/:id", verificarAutenticacion, uploadProductos.single("imagen"), actualizarProducto);
-router.delete("/eliminar/producto/:id", verificarAutenticacion, validacionProducto, eliminarProducto);
+
+router.get("/detalle/producto/:id",
+  obtenerProductoPorId
+);
+
+router.put("/actualizar/producto/:id",
+  verificarAutenticacion,
+  verificarRolAdmin,
+  uploadProductImage,
+  uploadErrorHandler,
+  validacionProducto,
+  actualizarProducto
+);
+
+router.delete("/eliminar/producto/:id",
+  verificarAutenticacion,
+  verificarRolAdmin,
+  eliminarProducto
+);
 
 export default router;
