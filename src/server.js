@@ -18,7 +18,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuraciones
-// Configuraciones
 app.set('port', process.env.PORT || 3000);
 
 // Configuración CORS
