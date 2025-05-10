@@ -10,7 +10,12 @@ const router = Router();
 router.post("/crear/producto", verificarAutenticacion, uploadProductImage, uploadErrorHandler, validacionProducto, registrarProducto);
 router.get("/listar/productos", listarProductos);
 router.get("/detalle/producto/:id", verificarAutenticacion, obtenerProductoPorId);
-router.put("/actualizar/producto/:id", verificarAutenticacion, uploadProductos.single("imagen"), actualizarProducto);
-router.delete("/eliminar/producto/:id", verificarAutenticacion, validacionProducto, eliminarProducto);
+router.put("/actualizar/producto/:id",
+  verificarAutenticacion,
+  uploadProductImage,
+  uploadErrorHandler,
+  validacionProducto,
+  actualizarProducto
+);router.delete("/eliminar/producto/:id", verificarAutenticacion, validacionProducto, eliminarProducto);
 
 export default router;
