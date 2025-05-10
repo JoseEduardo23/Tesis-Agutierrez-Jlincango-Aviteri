@@ -9,6 +9,6 @@ router.post("/crear/producto", verificarAutenticacion, validacionProducto, uploa
 router.get("/listar/productos", listarProductos);
 router.get("/detalle/producto/:id", verificarAutenticacion, obtenerProductoPorId);
 router.put("/actualizar/producto/:id", verificarAutenticacion, uploadProductos.single("imagen"), actualizarProducto);
-router.delete("/eliminar/producto/:id", verificarAutenticacion, validacionProducto, eliminarProducto);
+router.delete("/eliminar/producto/:id", verificarAutenticacion, eliminarProducto);
 
 export default router;
