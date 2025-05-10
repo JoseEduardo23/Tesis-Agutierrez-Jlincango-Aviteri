@@ -22,13 +22,13 @@ app.set('port', process.env.PORT || 3000);
 
 // Configuración CORS
 const corsOptions = {
-  origin: process.env.URL_FRONTEND,
+  origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'], 
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // Usar CORS con la configuración personalizada
 app.use(express.json());
 
 // Rutas de la API

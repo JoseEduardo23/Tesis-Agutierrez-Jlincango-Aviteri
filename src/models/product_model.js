@@ -4,43 +4,36 @@ const productSchema = new Schema({
     nombre: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
-    imagen: {
-        type: {
-            url: String,
-            public_id: String,
-            width: Number,
-            height: Number, 
-            format: String    
-        },
-        _id: false 
-    },
+    imagen:{
+        type: String,
+        trim: true, 
+      },
+    imagen_id:{
+        type: String,
+        trim: true, 
+      },
     descripcion: {
         type: String,
-        trim: true
+        trim: true,
     },
     precio: {
         type: Number,
         required: true,
-        min: 0
     },
     stock: {
         type: Number,
         required: true,
-        min: 0,
-        default: 0
     },
     categoria: {
         type: String,
         required: true,
         trim: true,
-        lowercase: true
+        enum: ['Perros', 'Gatos', 'Aves', 'Peces', 'Otros'],
     }
 }, {
     timestamps: true,
-    versionKey: false
 });
-
 
 export default model('Producto', productSchema);

@@ -20,7 +20,7 @@ const storageProductos = new CloudinaryStorage({
   params: {
     folder: 'productos',
     allowed_formats: ['jpg', 'jpeg', 'png'],
-    transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
+    transformation: [{ width: 500, height: 500, crop: 'limit' }],
   },
 });
 
