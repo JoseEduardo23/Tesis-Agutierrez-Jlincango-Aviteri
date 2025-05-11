@@ -103,12 +103,20 @@ const nuevoPassword = async (req, res) => {
 };
 
 const perfilUsuario = (req, res) => {
-    delete req.UsuarioBDD.token;
-    delete req.UsuarioBDD.confirmEmail;
-    delete req.UsuarioBDD.createdAt;
-    delete req.UsuarioBDD.updatedAt;
-    delete req.UsuarioBDD.__v;
-    res.status(200).json(req.UsuarioBDD);
+    const usuario = req.UsuarioBDD;
+    
+    delete usuario.token;
+    delete usuario.confirmEmail;
+    delete usuario.createdAt;
+    delete usuario.updatedAt;
+    delete usuario.__v;
+
+    res.status(200).json({
+        ...usuario._doc,  
+        imagen: {
+            url: usuario.imagen || null, 
+        },
+    });
 };
 const actualizarPassword = async (req, res) => {
     const { email, passwordactual, passwordnuevo } = req.body;
