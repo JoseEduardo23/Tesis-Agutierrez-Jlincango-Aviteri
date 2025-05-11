@@ -14,7 +14,7 @@ router.get('/usuario/confirmar/:token', confirmEmail);//🖇
 
 router.get("/usuarios", verificarAutenticacion, listarUsuarios)//🖇 
 router.get('/usuario/perfil', verificarAutenticacion, perfilUsuario); //🖇 
-router.put('/usuario/actualizar-perfil/:id', verificarAutenticacion, uploadUsuarios.single("imagen"), validacionUsers, actualizarPerfil);
+router.put('/usuario/actualizar-perfil/:id', verificarAutenticacion, uploadUsuarios.single("imagen"), actualizarPerfil);
 router.delete("/usuario/eliminar/:id", verificarAutenticacion, eliminarUsuario) //🖇 
 router.put('/usuario/actualizar-password/:id', verificarAutenticacion, actualizarPassword);//
 
