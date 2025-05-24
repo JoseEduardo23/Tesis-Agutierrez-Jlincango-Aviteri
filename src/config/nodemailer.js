@@ -4,14 +4,13 @@ import dotenv from "dotenv";
 dotenv.config()
 
 
-let transporter = nodemailer.createTransport({
-    service: 'gmail',
+const transporter = nodemailer.createTransport({
     host: process.env.HOST_MAILTRAP,
-    port: process.env.PORT_MAILTRAP,
+    port: process.env.PORT_MAILTRAP, 
     auth: {
         user: process.env.USER_MAILTRAP,
-        pass: process.env.PASS_MAILTRAP,
-    }
+        pass: process.env.PASS_MAILTRAP
+    },
 });
 
 const sendMailToUser = (userMail, token) => {
@@ -36,21 +35,35 @@ const sendMailToUser = (userMail, token) => {
 };
 
 
-const sendMailToRecoveryPassword = async(userMail,token)=>{
-    let info = await transporter.sendMail({
-    from: 'admin@tesis.com',
-    to: userMail,
-    subject: "Correo para reestablecer tu contraseña",
-    html: `
-    <h1>Sistema de prueba (TIENDANIMAL (> - <) )</h1>
-    <hr>
-    <a href=${process.env.URL_FRONTEND}/recuperar-password/${token}>Clic para reestablecer tu contraseña</a>
-    <hr>
-    <footer>Te damos la Bienvenida!</footer>
-    `
-    });
-    console.log("Mensaje enviado satisfactoriamente: ", info.messageId);
-}
+const sendMailToRecoveryPassword = async (userMail, token) => {
+    try {
+        const recoveryUrl = `${process.env.URL_FRONTEND}/recuperar-password/${encodeURIComponent(token)}`;
+        
+        const info = await transporter.sendMail({
+            from: `"TiendaAnimal" <${process.env.USER_MAILTRAP}>`,
+            to: userMail,
+            subject: "Restablece tu contraseña en TiendaAnimal",
+            html: `
+            <div style="font-family: Arial, sans-serif;">
+                <h1 style="color: #ff6b00;">TiendaAnimal 🐾</h1>
+                <p>Haz clic en el botón para restablecer tu contraseña:</p>
+                <a href="${recoveryUrl}" 
+                   style="background: #ff6b00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                    Restablecer contraseña
+                </a>
+                <p><small>Si no solicitaste esto, ignora este email.</small></p>
+            </div>
+            `
+        });
+        
+        console.log("Email enviado:", info.messageId);
+        return true;
+        
+    } catch (error) {
+        console.error("Error al enviar email:", error);
+        throw error;
+    }
+};
 
 
 export {

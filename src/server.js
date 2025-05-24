@@ -23,16 +23,18 @@ app.set('port', process.env.PORT || 3000);
 // Configuración CORS
 const corsOptions = {
   origin: [
-    process.env.URL_FRONTEND, 
-    'http://localhost:5173',  
-    'http://127.0.0.1:5173'    
+    'https://tiendaanimal.netlify.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions)); 
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // Rutas de la API
