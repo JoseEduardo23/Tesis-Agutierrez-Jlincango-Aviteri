@@ -22,10 +22,14 @@ app.set('port', process.env.PORT || 3000);
 
 // Configuración CORS
 const corsOptions = {
-  origin: process.env.URL_FRONTEND || 'http://localhost:5173/',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  origin: [
+    process.env.URL_FRONTEND, 
+    'http://localhost:5173',  
+    'http://127.0.0.1:5173'    
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+  credentials: true
 };
 
 app.use(cors(corsOptions)); 
