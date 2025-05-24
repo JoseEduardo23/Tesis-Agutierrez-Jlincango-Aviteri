@@ -24,9 +24,9 @@ const sendMailToUser = (userMail, token) => {
          <h1>Sistema de prueba (TIENDANIMAL - 🛒🐶🦴)</h1> <br>
         <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
+    
 
-
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log(error);
         } else {
@@ -36,22 +36,21 @@ const sendMailToUser = (userMail, token) => {
 };
 
 
-const sendMailToRecoveryPassword = async (userMail, token) => {
+const sendMailToRecoveryPassword = async(userMail,token)=>{
     let info = await transporter.sendMail({
-        from: 'admin@tesis.com',
-        to: userMail,
-        subject: "Correo para reestablecer tu contraseña",
-        html: `
+    from: 'admin@tesis.com',
+    to: userMail,
+    subject: "Correo para reestablecer tu contraseña",
+    html: `
     <h1>Sistema de prueba (TIENDANIMAL (> - <) )</h1>
     <hr>
-    <a href=${process.env.URL_FRONTEND}recuperar-password/${token}>Clic para reestablecer tu contraseña</a>
+    <a href=${process.env.URL_FRONTEND}/recuperar-password/${token}>Clic para reestablecer tu contraseña</a>
     <hr>
     <footer>Te damos la Bienvenida!</footer>
     `
     });
     console.log("Mensaje enviado satisfactoriamente: ", info.messageId);
 }
-
 
 
 export {
