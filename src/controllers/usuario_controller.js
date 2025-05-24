@@ -70,38 +70,15 @@ const login = async (req, res) => {
 };
 
 const recuperarPassword = async (req, res) => {
-    try {
-        const { email } = req.body;
-        
-        if (!email) {
-            return res.status(400).json({ msg: "El email es obligatorio" });
-        }
-
-        const usuarioBDD = await Usuario.findOne({ email });
-        if (!usuarioBDD) {
-            return res.status(404).json({ msg: "Usuario no registrado" });
-        }
-
-        const token = jwt.sign(
-            { id: usuarioBDD._id },
-            process.env.JWT_SECRET,
-            { expiresIn: '15m' }
-        );
-
-        usuarioBDD.token = token;
-        await usuarioBDD.save();
-
-        await sendMailToRecoveryPassword(email, token);
-        
-        res.status(200).json({ msg: "Revisa tu correo electrónico" });
-        
-    } catch (error) {
-        console.error("Error en recuperarPassword:", error);
-        res.status(500).json({ 
-            msg: "Error al procesar la solicitud",
-            error: error.message // Mostrará el error real
-        });
-    }
+    const { email } = req.body;
+    if (Object.values(req.body).includes("")) return res.status(404).json({ msg: "Todos los campos son obligatorios" });
+    const usuarioBDD = await Usuario.findOne({ email });
+    if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
+    const token = usuarioBDD.crearToken();
+    usuarioBDD.token = token;
+    await sendMailToRecoveryPassword(email, token);
+    await usuarioBDD.save();
+    res.status(200).json({ msg: "Revisa tu correo para restablecer tu contraseña" });
 };
 
 const comprobarTokenPasword = async (req, res) => {
