@@ -70,40 +70,46 @@ const login = async (req, res) => {
 };
 
 const recuperarPassword = async (req, res) => {
-    try {
-        const { email } = req.body;
-        
-        if (!email) {
-            return res.status(400).json({ msg: "El email es obligatorio" });
-        }
+  try {
+    const { email } = req.body;
+    
+    // Validación básica
+    if (!email) return res.status(400).json({ msg: "Email requerido" });
 
-        console.log("Buscando usuario con email:", email); // Log para debug
-        
-        const usuarioBDD = await Usuario.findOne({ email });
-        if (!usuarioBDD) {
-            return res.status(404).json({ msg: "Usuario no registrado" });
-        }
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) return res.status(404).json({ msg: "Email no registrado" });
 
-        console.log("Usuario encontrado. Generando token..."); // Debug
-        
-        const token = usuarioBDD.crearToken();
-        usuarioBDD.token = token;
-        await usuarioBDD.save();
+    const token = jwt.sign(
+      { id: usuario._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
 
-        console.log("Token generado:", token); // Debug
-        console.log("Enviando email a:", email); // Debug
-        
-        await sendMailToRecoveryPassword(email, token);
-        
-        res.status(200).json({ msg: "Revisa tu correo electrónico" });
-        
-    } catch (error) {
-        console.error("Error detallado en recuperarPassword:", error);
-        res.status(500).json({ 
-            msg: "Error al procesar la solicitud",
-            error: error.message // Envía el mensaje real (solo para desarrollo)
-        });
-    }
+    usuario.token = token;
+    await usuario.save();
+
+    // Enviar email
+    await transporter.sendMail({
+      from: `"TiendaAnimal" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: "Recuperación de contraseña",
+      html: `
+        <p>Haz clic en el enlace para recuperar tu contraseña:</p>
+        <a href="${process.env.URL_FRONTEND}/recuperar-password/${token}">
+          Recuperar contraseña
+        </a>
+      `
+    });
+
+    res.status(200).json({ msg: "Correo enviado correctamente" });
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ 
+      msg: "Error al enviar el correo",
+      error: process.env.NODE_ENV === 'development' ? error.message : null
+    });
+  }
 };
 const comprobarTokenPasword = async (req, res) => {
     const { token } = req.params;
