@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import { sendMailToUser, sendMailToRecoveryPassword } from "../config/nodemailer.js";
 import { generarJWT } from "../helpers/crearJWT.js";
 import cloudinary from "../config/cloudinary.js";
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 const registro = async (req, res) => {
     console.log(req.body);
@@ -72,34 +75,27 @@ const login = async (req, res) => {
 const recuperarPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        
-        if (!email) {
-            return res.status(400).json({ msg: "El email es obligatorio" });
-        }
+        if (!email) return res.status(400).json({ msg: "Email es obligatorio" });
 
         const usuarioBDD = await Usuario.findOne({ email });
-        if (!usuarioBDD) {
-            return res.status(404).json({ msg: "Usuario no registrado" });
+        if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
+
+        if (!usuarioBDD.crearToken) {
+            throw new Error("El método crearToken no está definido en el modelo Usuario");
         }
 
-        const token = jwt.sign(
-            { id: usuarioBDD._id },
-            process.env.JWT_SECRET,
-            { expiresIn: '15m' }
-        );
-
+        const token = usuarioBDD.crearToken();
         usuarioBDD.token = token;
-        await usuarioBDD.save();
-
+        
         await sendMailToRecoveryPassword(email, token);
+        await usuarioBDD.save();
         
-        res.status(200).json({ msg: "Revisa tu correo electrónico" });
-        
+        res.status(200).json({ msg: "Revisa tu correo para restablecer tu contraseña" });
     } catch (error) {
         console.error("Error en recuperarPassword:", error);
         res.status(500).json({ 
             msg: "Error al procesar la solicitud",
-            error: error.message
+            error: error.message // Mostrará el error real
         });
     }
 };
