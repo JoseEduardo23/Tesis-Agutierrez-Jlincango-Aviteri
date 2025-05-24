@@ -73,25 +73,38 @@ const recuperarPassword = async (req, res) => {
     try {
         const { email } = req.body;
         
-        if (!email) return res.status(400).json({ msg: "El email es obligatorio" });
+        if (!email) {
+            return res.status(400).json({ msg: "El email es obligatorio" });
+        }
+
+        console.log("Buscando usuario con email:", email); // Log para debug
         
         const usuarioBDD = await Usuario.findOne({ email });
-        if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: "Usuario no registrado" });
+        }
+
+        console.log("Usuario encontrado. Generando token..."); // Debug
         
         const token = usuarioBDD.crearToken();
         usuarioBDD.token = token;
         await usuarioBDD.save();
+
+        console.log("Token generado:", token); // Debug
+        console.log("Enviando email a:", email); // Debug
         
         await sendMailToRecoveryPassword(email, token);
         
-        res.status(200).json({ msg: "Revisa tu correo para restablecer tu contraseña" });
+        res.status(200).json({ msg: "Revisa tu correo electrónico" });
         
     } catch (error) {
-        console.error("Error en recuperarPassword:", error);
-        res.status(500).json({ msg: "Error al procesar la solicitud" });
+        console.error("Error detallado en recuperarPassword:", error);
+        res.status(500).json({ 
+            msg: "Error al procesar la solicitud",
+            error: error.message // Envía el mensaje real (solo para desarrollo)
+        });
     }
 };
-
 const comprobarTokenPasword = async (req, res) => {
     const { token } = req.params;
     if (!token) return res.status(404).json({ msg: "Token inválido" });
