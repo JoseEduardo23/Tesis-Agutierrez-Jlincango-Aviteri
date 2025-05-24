@@ -73,11 +73,14 @@ const recuperarPassword = async (req, res) => {
     try {
         const { email } = req.body;
         
-        // Validación mejorada
-        if (!email) return res.status(400).json({ msg: "Email requerido" });
+        if (!email) {
+            return res.status(400).json({ msg: "El email es obligatorio" });
+        }
 
         const usuarioBDD = await Usuario.findOne({ email });
-        if (!usuarioBDD) return res.status(404).json({ msg: "Email no registrado" });
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: "Usuario no registrado" });
+        }
 
         const token = jwt.sign(
             { id: usuarioBDD._id },
@@ -88,25 +91,15 @@ const recuperarPassword = async (req, res) => {
         usuarioBDD.token = token;
         await usuarioBDD.save();
 
-        // DEBUG: Verificar datos antes de enviar
-        console.log("Enviando email a:", email);
-        console.log("Token generado:", token);
-        console.log("Configuración SMTP:", {
-            service: process.env.SMTP_SERVICE,
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            user: process.env.SMTP_USER?.substring(0, 3) + '...' // Muestra parcialmente
-        });
-
         await sendMailToRecoveryPassword(email, token);
         
-        res.status(200).json({ msg: "Correo enviado" });
-
+        res.status(200).json({ msg: "Revisa tu correo electrónico" });
+        
     } catch (error) {
-        console.error("ERROR COMPLETO:", error); // ← Esto mostrará el error real
+        console.error("Error en recuperarPassword:", error);
         res.status(500).json({ 
-            msg: "Error al enviar el correo",
-            error: error.message // Ahora sí muestra el mensaje
+            msg: "Error al procesar la solicitud",
+            error: error.message // Mostrará el error real
         });
     }
 };
