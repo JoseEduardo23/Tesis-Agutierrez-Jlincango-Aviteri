@@ -5,6 +5,7 @@ dotenv.config()
 
 
 let transporter = nodemailer.createTransport({
+    service: 'gmail',
     host: process.env.HOST_MAILTRAP,
     port: process.env.PORT_MAILTRAP,
     auth: {
@@ -13,31 +14,34 @@ let transporter = nodemailer.createTransport({
     }
 });
 
-const sendMailToUser = async (userMail, token) => {
-    try {
-        const info = await transporter.sendMail({
-            from: process.env.USER_MAILTRAP,
-            to: userMail,
-            subject: "Verifica tu cuenta",
-            html: `
-                <h1>Sistema de prueba (TIENDANIMAL - 🛒🐶🦴)</h1><br>
-                <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>
-            `,
-        });
-        console.log("Correo enviado: ", info.messageId);
-    } catch (error) {
-        console.error("Error al enviar correo: ", error.message);
-        throw new Error("No se pudo enviar el correo de confirmación");
-    }
+const sendMailToUser = (userMail, token) => {
+
+    let mailOptions = {
+        from: process.env.USER_MAILTRAP,
+        to: userMail,
+        subject: "Verifica tu cuenta",
+        html: `
+         <h1>Sistema de prueba (TIENDANIMAL - 🛒🐶🦴)</h1> <br>
+        <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+    };
+    
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Correo enviado: ' + info.response);
+        }
+    });
 };
 
 
-const sendMailToRecoveryPassword = async (userMail, token) => {
+const sendMailToRecoveryPassword = async(userMail,token)=>{
     let info = await transporter.sendMail({
-        from: 'admin@tesis.com',
-        to: userMail,
-        subject: "Correo para reestablecer tu contraseña",
-        html: `
+    from: 'admin@tesis.com',
+    to: userMail,
+    subject: "Correo para reestablecer tu contraseña",
+    html: `
     <h1>Sistema de prueba (TIENDANIMAL (> - <) )</h1>
     <hr>
     <a href=${process.env.URL_FRONTEND}recuperar-password/${token}>Clic para reestablecer tu contraseña</a>
