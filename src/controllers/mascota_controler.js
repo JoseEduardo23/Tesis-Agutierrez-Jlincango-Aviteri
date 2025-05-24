@@ -31,7 +31,6 @@ const registrarMascota = async (req, res) => {
 
 const listarMascotas = async (req, res) => {
     try {
-        // Verificar si hay un propietario asociado al usuario que inició sesión
         if (req.UsuarioBDD && req.UsuarioBDD._id) {
             const mascotas = await Mascota.find({ usuario: req.UsuarioBDD._id }).select("-createdAt -updatedAt -__v").populate("usuario", "_id nombre apellido"); 
             return res.status(200).json(mascotas);
