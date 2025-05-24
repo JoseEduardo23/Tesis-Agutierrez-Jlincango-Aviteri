@@ -22,7 +22,7 @@ const sendMailToUser = (userMail, token) => {
         subject: "Verifica tu cuenta",
         html: `
          <h1>Sistema de prueba (TIENDANIMAL - 🛒🐶🦴)</h1> <br>
-        <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+        <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}/confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
     
 
