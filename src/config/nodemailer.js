@@ -22,7 +22,7 @@ const sendMailToUser = (userMail, token) => {
         subject: "Verifica tu cuenta",
         html: `
          <h1>Sistema de prueba (TIENDANIMAL - 🛒🐶🦴)</h1> <br>
-        <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}/confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
+        <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
     
 
@@ -44,7 +44,7 @@ const sendMailToRecoveryPassword = async(userMail,token)=>{
     html: `
     <h1>Sistema de prueba (TIENDANIMAL (> - <) )</h1>
     <hr>
-    <a href=${process.env.URL_FRONTEND}/recuperar-password/${token}>Clic para reestablecer tu contraseña</a>
+    <a href=${process.env.URL_FRONTEND}recuperar-password/${token}>Clic para reestablecer tu contraseña</a>
     <hr>
     <footer>Te damos la Bienvenida!</footer>
     `

@@ -28,7 +28,7 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use(cors(corsOptions)); // Usar CORS con la configuración personalizada
+app.use(cors(corsOptions)); 
 app.use(express.json());
 
 // Rutas de la API
