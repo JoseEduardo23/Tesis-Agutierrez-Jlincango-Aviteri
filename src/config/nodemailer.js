@@ -24,9 +24,9 @@ const sendMailToUser = (userMail, token) => {
          <h1>Sistema de prueba (TIENDANIMAL - 🛒🐶🦴)</h1> <br>
         <p>Hola, haz clic <a href="${process.env.URL_FRONTEND}/confirmar/${encodeURIComponent(token)}">aquí</a> para confirmar tu cuenta.</p>`
     };
-    
 
-    transporter.sendMail(mailOptions, function(error, info){
+
+    transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
         } else {
@@ -37,26 +37,21 @@ const sendMailToUser = (userMail, token) => {
 
 
 const sendMailToRecoveryPassword = async (userMail, token) => {
-    try {
-        const recoveryUrl = `${process.env.URL_FRONTEND}/recuperar-password/${token}`;
-        
-        console.log("Preparando email con URL:", recoveryUrl); // Debug
-        
-        const info = await transporter.sendMail({
-            from: `"TiendaAnimal" <${process.env.USER_MAILTRAP}>`,
-            to: userMail,
-            subject: "Restablece tu contraseña",
-            html: `<p>Haz clic <a href="${recoveryUrl}">aquí</a> para restablecer tu contraseña.</p>`
-        });
-        
-        console.log("Email enviado con ID:", info.messageId);
-        return true;
-        
-    } catch (error) {
-        console.error("Error al enviar email:", error);
-        throw new Error("Fallo al enviar el email: " + error.message);
-    }
-};
+    let info = await transporter.sendMail({
+        from: 'admin@tesis.com',
+        to: userMail,
+        subject: "Correo para reestablecer tu contraseña",
+        html: `
+    <h1>Sistema de prueba (TIENDANIMAL (> - <) )</h1>
+    <hr>
+    <a href=${process.env.URL_FRONTEND}/recuperar-password/${token}>Clic para reestablecer tu contraseña</a>
+    <hr>
+    <footer>Te damos la Bienvenida!</footer>
+    `
+    });
+    console.log("Mensaje enviado satisfactoriamente: ", info.messageId);
+}
+
 
 
 export {
