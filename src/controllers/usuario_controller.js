@@ -70,47 +70,47 @@ const login = async (req, res) => {
 };
 
 const recuperarPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    
-    // Validación básica
-    if (!email) return res.status(400).json({ msg: "Email requerido" });
+    try {
+        const { email } = req.body;
+        
+        // Validación mejorada
+        if (!email) return res.status(400).json({ msg: "Email requerido" });
 
-    const usuario = await Usuario.findOne({ email });
-    if (!usuario) return res.status(404).json({ msg: "Email no registrado" });
+        const usuarioBDD = await Usuario.findOne({ email });
+        if (!usuarioBDD) return res.status(404).json({ msg: "Email no registrado" });
 
-    const token = jwt.sign(
-      { id: usuario._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '15m' }
-    );
+        const token = jwt.sign(
+            { id: usuarioBDD._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
 
-    usuario.token = token;
-    await usuario.save();
+        usuarioBDD.token = token;
+        await usuarioBDD.save();
 
-    // Enviar email
-    await transporter.sendMail({
-      from: `"TiendaAnimal" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: "Recuperación de contraseña",
-      html: `
-        <p>Haz clic en el enlace para recuperar tu contraseña:</p>
-        <a href="${process.env.URL_FRONTEND}/recuperar-password/${token}">
-          Recuperar contraseña
-        </a>
-      `
-    });
+        // DEBUG: Verificar datos antes de enviar
+        console.log("Enviando email a:", email);
+        console.log("Token generado:", token);
+        console.log("Configuración SMTP:", {
+            service: process.env.SMTP_SERVICE,
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            user: process.env.SMTP_USER?.substring(0, 3) + '...' // Muestra parcialmente
+        });
 
-    res.status(200).json({ msg: "Correo enviado correctamente" });
+        await sendMailToRecoveryPassword(email, token);
+        
+        res.status(200).json({ msg: "Correo enviado" });
 
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ 
-      msg: "Error al enviar el correo",
-      error: process.env.NODE_ENV === 'development' ? error.message : null
-    });
-  }
+    } catch (error) {
+        console.error("ERROR COMPLETO:", error); // ← Esto mostrará el error real
+        res.status(500).json({ 
+            msg: "Error al enviar el correo",
+            error: error.message // Ahora sí muestra el mensaje
+        });
+    }
 };
+
 const comprobarTokenPasword = async (req, res) => {
     const { token } = req.params;
     if (!token) return res.status(404).json({ msg: "Token inválido" });
@@ -134,7 +134,7 @@ const nuevoPassword = async (req, res) => {
 
 const perfilUsuario = (req, res) => {
     const usuario = req.UsuarioBDD;
-    
+
     delete usuario.token;
     delete usuario.confirmEmail;
     delete usuario.createdAt;
@@ -142,9 +142,9 @@ const perfilUsuario = (req, res) => {
     delete usuario.__v;
 
     res.status(200).json({
-        ...usuario._doc,  
+        ...usuario._doc,
         imagen: {
-            url: usuario.imagen || null, 
+            url: usuario.imagen || null,
         },
     });
 };
@@ -255,7 +255,7 @@ const eliminarUsuario = async (req, res) => {
         res.status(200).json({ msg: "Usuario eliminado exitosamente" })
 
     } catch (error) {
-        res.status(500).json({ msg: "Error al eliminar el usuario", error: error.message }) ;
+        res.status(500).json({ msg: "Error al eliminar el usuario", error: error.message });
     }
 }
 
