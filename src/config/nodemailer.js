@@ -7,8 +7,8 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.GMAIL_USER, // Tu email de Gmail completo
-    pass: process.env.GMAIL_APP_PASSWORD // Contraseña de aplicación (16 dígitos)
+    user: process.env.GMAIL_USER, 
+    pass: process.env.GMAIL_APP_PASSWORD 
   }
 });
 
@@ -54,7 +54,7 @@ const sendMailToUser = (userMail, token) => {
 const sendMailToRecoveryPassword = async (userMail, token) => {
   try {
     const info = await transporter.sendMail({
-      from: `"Soporte TiendaAnimal" <${process.env.GMAIL_USER}>`, // Email autorizado
+      from: `"Soporte TiendaAnimal" <${process.env.GMAIL_USER}>`,
       to: userMail,
       subject: "Restablece tu contraseña en TiendaAnimal",
       html: `
