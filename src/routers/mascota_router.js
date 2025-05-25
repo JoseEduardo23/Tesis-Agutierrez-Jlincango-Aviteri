@@ -6,7 +6,7 @@ import { uploadMascotas } from "../middlewares/upload_cloudinary.js"
   
 const router = Router()
 
-router.post("/mascota/registro", verificarAutenticacion, validacionMascota, uploadMascotas.single("imagen"), registrarMascota) 
+router.post("/mascota/registro", verificarAutenticacion, uploadMascotas.single("imagen"), validacionMascota, registrarMascota) 
 
 router.get("/mascota/listar", verificarAutenticacion, listarMascotas)
 
