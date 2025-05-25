@@ -17,9 +17,9 @@ let transporter = nodemailer.createTransport({
 const sendMailToUser = (userMail, token) => {
 
   let mailOptions = {
-    from: process.env.USER_MAILTRAP,
     to: userMail,
-    subject: "Verifica tu cuenta",
+    from: `"Tiendanimal"<${process.env.USER_MAILTRAP}>`,
+    subject: "Verifica tu cuenta en Tiendanimal",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #4CAF50;">¡Bienvenido a TiendaAnimal! 🛒🐶🦴</h1>
@@ -49,9 +49,9 @@ const sendMailToUser = (userMail, token) => {
 
 const sendMailToRecoveryPassword = async (userMail, token) => {
   let info = await transporter.sendMail({
-    from: 'admin@tesis.com',
+    from: 'Soporte Tiendanimal',
     to: userMail,
-    subject: "Correo para reestablecer tu contraseña",
+    subject: "Restablece tu contraseña en Tiendanimal",
     html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #FF5722;">Recuperación de contraseña (> - <)</h1>
