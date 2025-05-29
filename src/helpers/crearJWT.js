@@ -19,7 +19,7 @@ const verificarAutenticacion = async (req, res, next) => {
         if (rol === "Administrador") {
             req.AdministradorBDD = await Administrador.findById(id).lean().select("-password");
             next();
-        } else {
+        } else if (rol === "Usuario"){
             req.UsuarioBDD = await Usuario.findById(id).select("-password");
             next();
         }

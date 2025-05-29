@@ -4,6 +4,7 @@ import { sendMailToUser, sendMailToRecoveryPassword } from "../config/nodemailer
 import { generarJWT } from "../helpers/crearJWT.js";
 import cloudinary from "../config/cloudinary.js";
 import dotenv from 'dotenv'
+import Producto from "../models/product_model.js";
 
 dotenv.config();
 
@@ -232,6 +233,80 @@ const eliminarUsuario = async (req, res) => {
     }
 }
 
+const obtenerFavoritos = async (req, res) => {
+    try {
+        const usuario = await Usuario.findById(req.UsuarioBDD._id)
+            .populate("favoritos", "-__v -createdAt -updatedAt");
+
+        if (!usuario) {
+            return res.status(404).json({ msg: "Usuario no encontrado" });
+        }
+
+        res.status(200).json({ favoritos: usuario.favoritos });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al obtener favoritos", error: error.message });
+    }
+};
+
+// Agregar producto a favoritos
+const agregarFavorito = async (req, res) => {
+    const productoId = req.params.id;
+    if (!productoId) {
+        return res.status(400).json({ msg: "Debes proporcionar el ID del producto" });
+    }
+
+    try {
+        const producto = await Producto.findById(productoId);
+        if (!producto) {
+            return res.status(404).json({ msg: "Producto no encontrado" });
+        }
+
+        const usuario = await Usuario.findById(req.UsuarioBDD._id);
+
+        // Verificar si ya está en favoritos
+        if (usuario.favoritos.some(id => id.toString() === productoId)) {
+            return res.status(400).json({ msg: "El producto ya está en favoritos" });
+        }
+
+        if (usuario.favoritos.length >= 15) {
+            return res.status(400).json({ msg: "Máximo de 15 productos favoritos alcanzado" });
+        }
+
+        usuario.favoritos.push(productoId);
+        await usuario.save();
+
+        const usuarioActualizado = await Usuario.findById(req.UsuarioBDD._id)
+            .populate("favoritos", "-__v -createdAt -updatedAt");
+
+        res.status(200).json({ msg: "Producto agregado a favoritos", favoritos: usuarioActualizado.favoritos });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al agregar favorito", error: error.message });
+    }
+};
+
+// Eliminar producto de favoritos
+const eliminarFavorito = async (req, res) => {
+    const productoId = req.params.id;
+
+    try {
+        const usuario = await Usuario.findById(req.UsuarioBDD._id);
+
+        if (!usuario.favoritos.some(id => id.toString() === productoId)) {
+            return res.status(404).json({ msg: "Producto no encontrado en favoritos" });
+        }
+
+        usuario.favoritos = usuario.favoritos.filter(id => id.toString() !== productoId);
+        await usuario.save();
+
+        const usuarioActualizado = await Usuario.findById(req.UsuarioBDD._id)
+            .populate("favoritos", "-__v -createdAt -updatedAt");
+
+        res.status(200).json({ msg: "Producto eliminado de favoritos", favoritos: usuarioActualizado.favoritos });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al eliminar favorito", error: error.message });
+    }
+};
+
 export {
     registro,
     login,
@@ -243,5 +318,8 @@ export {
     actualizarPassword,
     actualizarPerfil,
     listarUsuarios,
-    eliminarUsuario
+    eliminarUsuario,
+    obtenerFavoritos,
+    agregarFavorito,
+    eliminarFavorito
 };

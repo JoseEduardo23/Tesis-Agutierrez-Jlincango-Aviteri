@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { verificarAutenticacion } from '../helpers/crearJWT.js';
-import { registro, login, confirmEmail, recuperarPassword, comprobarTokenPasword, nuevoPassword, perfilUsuario, actualizarPassword, actualizarPerfil, listarUsuarios, eliminarUsuario } from '../controllers/usuario_controller.js';
+import { registro, login, confirmEmail, recuperarPassword, comprobarTokenPasword, nuevoPassword, perfilUsuario, actualizarPassword, actualizarPerfil, listarUsuarios, eliminarUsuario, agregarFavorito, eliminarFavorito, obtenerFavoritos } from '../controllers/usuario_controller.js';
 import { validacionUsers } from '../middlewares/users_validations.js';
 import { uploadUsuarios } from '../middlewares/upload_cloudinary.js';
 const router = Router();
@@ -17,5 +17,9 @@ router.get('/usuario/perfil', verificarAutenticacion, perfilUsuario); //🖇
 router.put('/usuario/actualizar-perfil/:id', verificarAutenticacion, uploadUsuarios.single("imagen"), actualizarPerfil);
 router.delete("/usuario/eliminar/:id", verificarAutenticacion, eliminarUsuario) //🖇 
 router.put('/usuario/actualizar-password/:id', verificarAutenticacion, actualizarPassword);//
+
+router.get("/usuario/favoritos", verificarAutenticacion, obtenerFavoritos)
+router.post("/usuario/agregar-favorito/:id", verificarAutenticacion, agregarFavorito)
+router.delete("/usuario/eliminar-favorito/:id", verificarAutenticacion, eliminarFavorito)
 
 export default router;

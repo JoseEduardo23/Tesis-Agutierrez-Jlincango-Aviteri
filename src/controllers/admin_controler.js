@@ -4,16 +4,22 @@ import { sendMailToUser, sendMailToRecoveryPassword } from "../config/nodemailer
 import { generarJWT } from "../helpers/crearJWT.js";
 
 const registro = async (req, res) => {
-    const { email, password } = req.body;
-    if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
-    const verificarEmailBDD = await Administrador.findOne({ email });
-    if (verificarEmailBDD) return res.status(400).json({ msg: "Lo sentimos, el email ya se encuentra registrado" });
-    const nuevoUser = new Administrador(req.body);
-    nuevoUser.password = await nuevoUser.encrypPassword(password);
-    const token = nuevoUser.crearToken();
-    await sendMailToUser(email, token);
-    await nuevoUser.save();
-    res.status(200).json({ nuevoUser, msg: "Registro Exitoso, correo electrónico de confirmación enviado" });
+    try {
+        const { email, password } = req.body;
+        console.log(req.body)
+        if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+        const verificarEmailBDD = await Administrador.findOne({ email });
+        if (verificarEmailBDD) return res.status(400).json({ msg: "Lo sentimos, el email ya se encuentra registrado" });
+        const nuevoUser = new Administrador(req.body);
+        nuevoUser.password = await nuevoUser.encrypPassword(password);
+        const token = nuevoUser.crearToken();
+        await sendMailToUser(email, token);
+        await nuevoUser.save();
+        res.status(200).json({ nuevoUser, msg: "Registro Exitoso, correo electrónico de confirmación enviado" });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ msg: "Lo sentimos, ha ocurrido un error inesperado, intentelo de nuevo" });
+    }
 }
 
 const confirmEmail = async (req, res) => {

@@ -23,6 +23,8 @@ router.get("/recuperar-password/:token", comprobarTokenPasword)
 //Endpoint para crear una nueva contraseña
 router.post("/nuevo-password/:token", nuevoPassword)
 
+//Endpoint para actualizar la contraseña del administrador
+router.put("/actualizar-password",verificarAutenticacion, actualizarPassword);
 
 
 //Endpoint para ver el perfil del usuario
@@ -31,8 +33,6 @@ router.get('/perfil',verificarAutenticacion, perfilAdministrador)
 //Endpoint para actualizar el perfil del usuario
 router.put('/perfil/:id',verificarAutenticacion, actualizarPerfil);
 
-//Endpoint para actualizar la contraseña del usuario
-router.put("/actualizar-password",verificarAutenticacion, actualizarPassword);
 
 
 export default router
