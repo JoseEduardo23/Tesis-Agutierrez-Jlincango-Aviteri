@@ -133,10 +133,32 @@ const eliminarProducto = async (req, res) => {
     }
 };
 
+const listarProductosPublicos = async (req,res) =>{
+    try{
+        const productos = await Producto.find(
+            {},
+            {
+                nombre:1,
+                imagen:1,
+                descripcion:1,
+                precio:1,
+                stock:1,
+                categoria:1,
+                _id:1
+            }
+        )
+        res.status(200).json(productos)
+    }catch(error){
+        console.error(error)
+        res.status(500).json({msg:"Error al obtener productos públicos"})
+    }
+}
+
 export {
     registrarProducto,
     listarProductos,
     obtenerProductoPorId,
     actualizarProducto,
     eliminarProducto,
+    listarProductosPublicos
 };
