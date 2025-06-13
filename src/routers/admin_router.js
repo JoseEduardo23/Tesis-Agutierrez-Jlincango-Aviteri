@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import { comprobarTokenPasword, confirmEmail, login, nuevoPassword, recuperarPassword, registro,actualizarPassword, actualizarPerfil, perfilAdministrador} from '../controllers/admin_controler.js'
+import { comprobarTokenPasword, login, nuevoPassword, recuperarPassword, registro,actualizarPassword, actualizarPerfil, perfilAdministrador} from '../controllers/admin_controler.js'
 import { verificarAutenticacion } from '../helpers/crearJWT.js'
 import { validacionUsers } from '../middlewares/users_validations.js'
 
@@ -7,9 +7,6 @@ const router = Router()
 
 //Endpoint para el registro
 router.post("/register", validacionUsers, registro)
-
-//Endpoint para confirmar el regitro
-router.get("/confirmar/:token", confirmEmail)
 
 //Endpoint para el inicio de sesion
 router.post("/login", login)
@@ -25,7 +22,6 @@ router.post("/nuevo-password/:token", nuevoPassword)
 
 //Endpoint para actualizar la contraseña del administrador
 router.put("/actualizar-password",verificarAutenticacion, actualizarPassword);
-
 
 //Endpoint para ver el perfil del usuario
 router.get('/perfil',verificarAutenticacion, perfilAdministrador)

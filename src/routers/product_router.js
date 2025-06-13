@@ -8,7 +8,7 @@ const router = Router();
 router.post("/crear/producto", verificarAutenticacion,uploadProductos.single("imagen"), validacionProducto, registrarProducto);
 router.get("/listar/productos", listarProductos);
 router.get("/detalle/producto/:id", verificarAutenticacion, obtenerProductoPorId);
-router.put("/actualizar/producto/:id", verificarAutenticacion, uploadProductos.single("imagen"), actualizarProducto);
+router.put("/actualizar/producto/:id", verificarAutenticacion, uploadProductos.single("imagen"), validacionProducto, actualizarProducto);
 router.delete("/eliminar/producto/:id", verificarAutenticacion, eliminarProducto);
 router.get("/public", listarProductosPublicos)
 export default router;

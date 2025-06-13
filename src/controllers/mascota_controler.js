@@ -1,7 +1,10 @@
+import { GoogleGenAI } from "@google/genai";
 import Mascota from "../models/mascota_model.js";
 import mongoose from 'mongoose';
 import cloudinary from "../config/cloudinary.js";
+import dotenv from "dotenv";
 
+dotenv.config()
 
 const registrarMascota = async (req, res) => {
     if (Object.values(req.body).includes("")) {
@@ -69,7 +72,7 @@ const detalleMascota = async (req, res) => {
 
 const actualizarMascota = async (req, res) => {
     const { id } = req.params;
-    const { nombre, raza, edad, actividad, peso } = req.body;
+    const { nombre, raza, edad, actividad, peso, enfermedades } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ msg: "ID inválido" });
@@ -84,7 +87,6 @@ const actualizarMascota = async (req, res) => {
         if (!mascota) {
             return res.status(403).json({ msg: "No tienes permisos para eliminar esta mascota o no se ha encontrado el registro" });
         }
-        // borro la anterior imagen de Cloudinary y guardo la nueva
         if (req.file) {
             if (mascota.imagen_id) {
                  await cloudinary.uploader.destroy(mascota.imagen_id);
@@ -92,7 +94,7 @@ const actualizarMascota = async (req, res) => {
             mascota.imagen = req.file.path;
             mascota.imagen_id = req.file.filename;
         }
-        Object.assign(mascota, { nombre, raza, edad, actividad, peso });
+        Object.assign(mascota, { nombre, raza, edad, actividad, peso, enfermedades });
         await mascota.save();
         res.status(200).json({ msg: "Mascota actualizada con éxito", mascota });
     } catch (error) {
@@ -124,10 +126,49 @@ const eliminarMascota = async (req, res) => {
     }
 };
 
+
+
+const generarDieta = async (req, res) => {
+    
+    const ai = new GoogleGenAI({ apiKey: `${process.env.GEMINI_API_KEY}` });
+
+    const { id } = req.params;
+
+    const { presupuesto } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ msg: "ID inválido" });
+    }
+    if (presupuesto === undefined || presupuesto === null) {
+        return res.status(400).json({ msg: "Seleccione su presupuesto" });
+    }
+
+    try {
+        const mascota = await Mascota.findById(id).findOne({ usuario: req.UsuarioBDD._id });
+        if (!mascota) {
+            return res.status(403).json({ msg: "No tienes permisos para generar la dieta o no se ha encontrado el registro" });
+        }
+
+        const response = await ai.models.generateContent({
+            model: "gemini-2.0-flash",
+            contents: `${process.env.PROMPT_GEMINI}Para una mascota de raza: ${mascota.raza}, edad: ${mascota.edad} años, peso: ${mascota.peso} kg, actividad: ${mascota.actividad} y sin enfermedades conocidas con un presupuesto promedio en Ecuador. Se resumido y conciso. mascota de raza: ${mascota.raza}, edad: ${mascota.edad} años, peso: ${mascota.peso} kg, actividad: ${mascota.actividad},`
+        });
+
+        mascota.dieta = response.text;
+        await mascota.save();
+
+        res.status(200).json({ msg: "Dieta generada con éxito", dieta: response.text });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Error al generar la dieta", error:error.message });
+    }
+}
+
 export {
     registrarMascota,
     listarMascotas,
     detalleMascota,
     actualizarMascota,
     eliminarMascota,
+    generarDieta
 };

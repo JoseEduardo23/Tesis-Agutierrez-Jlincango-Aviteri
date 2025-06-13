@@ -1,5 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
-
+const mascotaDieta = new Schema({
+  
+});
 const mascotaSchema = new Schema(
   {
     nombre: {
@@ -32,6 +34,15 @@ const mascotaSchema = new Schema(
     },
     peso: {
       type: Number,
+      required: true,
+    },
+    dieta:{
+      type: String,
+      default:null,
+    },
+    enfermedades:{
+      type: String,
+      default:null,
       required: true,
     },
     usuario: {

@@ -44,11 +44,6 @@ const adminSchema = new Schema({
         type:String,
         default:null
     },
-    confirmEmail:{
-        type:Boolean,
-        default:null
-    }
-    
 },{
     timestamps:true
 })
