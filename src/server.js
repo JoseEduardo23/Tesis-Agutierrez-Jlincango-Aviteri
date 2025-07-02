@@ -18,7 +18,9 @@ const __dirname = path.dirname(__filename);
 app.set('port', process.env.PORT || 3000);
 
 const corsOptions = {
-
+  origin: [
+    'https://tiendaanimal.netlify.app',
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
