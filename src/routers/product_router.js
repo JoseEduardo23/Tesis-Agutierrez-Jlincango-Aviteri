@@ -5,10 +5,10 @@ import { validacionProducto } from "../middlewares/productos_validations.js";
 import { uploadProductos } from "../middlewares/upload_cloudinary.js"
 const router = Router();
 
-router.post("/crear/producto", verificarAutenticacion,uploadProductos.single("imagen"), validacionProducto, registrarProducto);
-router.get("/listar/productos", listarProductos);
-router.get("/detalle/producto/:id", verificarAutenticacion, obtenerProductoPorId);
-router.put("/actualizar/producto/:id", verificarAutenticacion, uploadProductos.single("imagen"), validacionProducto, actualizarProducto);
-router.delete("/eliminar/producto/:id", verificarAutenticacion, eliminarProducto);
-router.get("/public", listarProductosPublicos)
+router.post("/producto/crear", verificarAutenticacion,uploadProductos.single("imagen"), validacionProducto, registrarProducto);
+router.get("/productos/listar", verificarAutenticacion, listarProductos);
+router.get("/producto/detalle/:id", verificarAutenticacion, obtenerProductoPorId);
+router.put("/producto/actualizar/:id", verificarAutenticacion, uploadProductos.single("imagen"), validacionProducto, actualizarProducto);
+router.delete("/producto/eliminar/:id", verificarAutenticacion, eliminarProducto);
+router.get("/productos/publico", listarProductosPublicos)
 export default router;

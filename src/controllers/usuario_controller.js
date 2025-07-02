@@ -35,7 +35,7 @@ const registro = async (req, res) => {
         const token = nuevoUser.crearToken();
         await sendMailToUser(email, token);
         await nuevoUser.save();
-        res.status(200).json({ nuevoUser, msg: "Registro exitoso, revisa tu correo" });
+        res.status(200).json({ nuevoUser, msg: "Registro exitoso, revisa tu correo para confirmar tu cuenta" });
     } catch (error) {
         res.status(500).json({ msg: "Error al registrar el usuario", error: error.message });
     }
@@ -45,52 +45,68 @@ const registro = async (req, res) => {
 const confirmEmail = async (req, res) => {
     const { token } = req.params;
     if (!token) return res.status(400).json({ msg: "Token inválido" });
-    const usuarioBDD = await Usuario.findOne({ token });
-    if (!usuarioBDD?.token) return res.status(404).json({ msg: "La cuenta ya ha sido confirmada" });
-    usuarioBDD.token = null;
-    usuarioBDD.confirmEmail = true;
-    await usuarioBDD.save();
-    res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesión" });
+    try {
+        const usuarioBDD = await Usuario.findOne({ token });
+        if (!usuarioBDD?.token) return res.status(404).json({ msg: "La cuenta ya ha sido confirmada" });
+        usuarioBDD.token = null;
+        usuarioBDD.confirmEmail = true;
+        await usuarioBDD.save();
+        res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesión" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al confirmar el email", error: error.message });
+    }
 };
 
 const login = async (req, res) => {
     const { email, password } = req.body;
     if (Object.values(req.body).includes("")) return res.status(404).json({ msg: "Todos los campos son obligatorios" });
-    const usuarioBDD = await Usuario.findOne({ email }).select("-__v -token -updatedAt -createdAt");
-    if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
-    if (!usuarioBDD.confirmEmail) return res.status(403).json({ msg: "Verifica tu cuenta" });
-    const verificarPassword = await usuarioBDD.compararPassword(password);
-    if (!verificarPassword) return res.status(404).json({ msg: "Contraseña incorrecta" });
-    const token = generarJWT(usuarioBDD._id, "Usuario");
-    res.status(200).json({
-        nombre: usuarioBDD.nombre,
-        apellido: usuarioBDD.apellido,
-        direccion: usuarioBDD.direccion,
-        telefono: usuarioBDD.telefono,
-        _id: usuarioBDD._id,
-        token,
-        email: usuarioBDD.email
-    });
+    try {
+        const usuarioBDD = await Usuario.findOne({ email }).select("-__v -token -updatedAt -createdAt");
+        if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
+        if (!usuarioBDD.confirmEmail) return res.status(403).json({ msg: "Verifica tu cuenta" });
+        const verificarPassword = await usuarioBDD.compararPassword(password);
+        if (!verificarPassword) return res.status(404).json({ msg: "Contraseña incorrecta" });
+        const token = generarJWT(usuarioBDD._id, "Usuario");
+        res.status(200).json({
+            nombre: usuarioBDD.nombre,
+            apellido: usuarioBDD.apellido,
+            direccion: usuarioBDD.direccion,
+            telefono: usuarioBDD.telefono,
+            _id: usuarioBDD._id,
+            token,
+            email: usuarioBDD.email
+        });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al iniciar sesión", error: error.message });
+    }
 };
 
 const recuperarPassword = async (req, res) => {
     const { email } = req.body;
     if (Object.values(req.body).includes("")) return res.status(404).json({ msg: "Todos los campos son obligatorios" });
-    const usuarioBDD = await Usuario.findOne({ email });
-    if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
-    const token = usuarioBDD.crearToken();
-    usuarioBDD.token = token;
-    await sendMailToRecoveryPassword(email, token);
-    await usuarioBDD.save();
-    res.status(200).json({ msg: "Revisa tu correo para restablecer tu contraseña" });
+    try {
+        const usuarioBDD = await Usuario.findOne({ email });
+        if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
+        const token = usuarioBDD.crearToken();
+        usuarioBDD.token = token;
+        await sendMailToRecoveryPassword(email, token);
+        await usuarioBDD.save();
+        res.status(200).json({ msg: "Revisa tu correo para restablecer tu contraseña" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al recuperar la contraseña", error: error.message });
+    }
 };
 
 const comprobarTokenPasword = async (req, res) => {
     const { token } = req.params;
     if (!token) return res.status(404).json({ msg: "Token inválido" });
-    const usuarioBDD = await Usuario.findOne({ token });
-    if (!usuarioBDD?.token) return res.status(404).json({ msg: "Token inválido" });
-    res.status(200).json({ msg: "Token válido, puedes crear una nueva contraseña" });
+    try {
+        const usuarioBDD = await Usuario.findOne({ token });
+        if (!usuarioBDD?.token) return res.status(404).json({ msg: "Token inválido" });
+        res.status(200).json({ msg: "Token válido, puedes crear una nueva contraseña" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al comprobar el token", error: error.message });
+    }
 };
 
 const nuevoPassword = async (req, res) => {
@@ -98,51 +114,63 @@ const nuevoPassword = async (req, res) => {
     if (Object.values(req.body).includes("")) return res.status(404).json({ msg: "Todos los campos son obligatorios" });
     if (password !== confirmpassword) return res.status(404).json({ msg: "Las contraseñas no coinciden" });
     const { token } = req.params;
-    const usuarioBDD = await Usuario.findOne({ token });
-    if (!usuarioBDD?.token) return res.status(404).json({ msg: "Token inválido" });
-    usuarioBDD.token = null;
-    usuarioBDD.password = await usuarioBDD.encriptarPassword(password);
-    await usuarioBDD.save();
-    res.status(200).json({ msg: "Contraseña actualizada, ya puedes iniciar sesión" });
+    try {
+        const usuarioBDD = await Usuario.findOne({ token });
+        if (!usuarioBDD?.token) return res.status(404).json({ msg: "Token inválido" });
+        usuarioBDD.token = null;
+        usuarioBDD.password = await usuarioBDD.encriptarPassword(password);
+        await usuarioBDD.save();
+        res.status(200).json({ msg: "Contraseña actualizada, ya puedes iniciar sesión" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al actualizar la contraseña", error: error.message });
+    }
 };
 
 const perfilUsuario = (req, res) => {
     const usuario = req.UsuarioBDD;
 
-    delete usuario.token;
-    delete usuario.confirmEmail;
-    delete usuario.createdAt;
-    delete usuario.updatedAt;
-    delete usuario.__v;
-
-    res.status(200).json({
-        ...usuario._doc,
-        imagen: {
-            url: usuario.imagen || null,
-        },
-    });
+    try {
+        delete usuario.token;
+        delete usuario.confirmEmail;
+        delete usuario.createdAt;
+        delete usuario.updatedAt;
+        delete usuario.__v;
+    
+        res.status(200).json({
+            ...usuario._doc,
+            imagen: {
+                url: usuario.imagen || null,
+            },
+        });
+    } catch (error) {
+        console.error("Error al obtener el perfil del usuario:", error);
+        res.status(500).json({ msg: "Error al obtener el perfil del usuario", error: error.message });
+    }
 };
 const actualizarPassword = async (req, res) => {
     const { email, passwordactual, passwordnuevo } = req.body;
 
     if (Object.values(req.body).includes("")) {
-        return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+        return res.status(404).json({ msg: "Lo sentimos, debes llenar todos los campos" });
     }
+    try {
+        const usuarioBDD = await Usuario.findOne({ email });
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: `No existe un usuario con el correo: ${email}` });
+        }
 
-    const usuarioBDD = await Usuario.findOne({ email });
-    if (!usuarioBDD) {
-        return res.status(404).json({ msg: `No existe un usuario con el correo: ${email}` });
+        const verificarPassword = await usuarioBDD.compararPassword(passwordactual);
+        if (!verificarPassword) {
+            return res.status(400).json({ msg: "La contraseña actual no es correcta" });
+        }
+
+        usuarioBDD.password = await usuarioBDD.encriptarPassword(passwordnuevo);
+        await usuarioBDD.save();
+
+        res.status(200).json({ msg: "Contraseña actualizada correctamente" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al actualizar la contraseña", error: error.message });
     }
-
-    const verificarPassword = await usuarioBDD.compararPassword(passwordactual);
-    if (!verificarPassword) {
-        return res.status(400).json({ msg: "La contraseña actual no es correcta" });
-    }
-
-    usuarioBDD.password = await usuarioBDD.encriptarPassword(passwordnuevo);
-    await usuarioBDD.save();
-
-    res.status(200).json({ msg: "Contraseña actualizada correctamente" });
 };
 
 const actualizarPerfil = async (req, res) => {
@@ -235,20 +263,18 @@ const eliminarUsuario = async (req, res) => {
 
 const obtenerFavoritos = async (req, res) => {
     try {
-        const usuario = await Usuario.findById(req.UsuarioBDD._id)
-            .populate("favoritos", "-__v -createdAt -updatedAt");
+        const usuario = await Usuario.findById(req.UsuarioBDD._id).populate("favoritos", "-__v -createdAt -updatedAt");
 
         if (!usuario) {
             return res.status(404).json({ msg: "Usuario no encontrado" });
         }
-
+        
         res.status(200).json({ favoritos: usuario.favoritos });
     } catch (error) {
         res.status(500).json({ msg: "Error al obtener favoritos", error: error.message });
     }
 };
 
-// Agregar producto a favoritos
 const agregarFavorito = async (req, res) => {
     const productoId = req.params.id;
     if (!productoId) {

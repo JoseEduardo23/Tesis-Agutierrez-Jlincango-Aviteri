@@ -46,7 +46,6 @@ const listarMascotas = async (req, res) => {
     }
 };
 
-// Método para ver los detalles de una mascota en particular
 const detalleMascota = async (req, res) => {
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -133,8 +132,14 @@ const generarDieta = async (req, res) => {
     const ai = new GoogleGenAI({ apiKey: `${process.env.GEMINI_API_KEY}` });
 
     const { id } = req.params;
-
+    
     const { presupuesto } = req.body;
+    
+    const presupuestosValidas = ["Alto", "Medio", "Regular"];
+
+    if (!presupuestosValidas.includes(presupuesto)) {
+        return res.status(400).json({ msg: "Ingrese un presupuesto valido" });
+    }
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ msg: "ID inválido" });
@@ -151,7 +156,7 @@ const generarDieta = async (req, res) => {
 
         const response = await ai.models.generateContent({
             model: "gemini-2.0-flash",
-            contents: `${process.env.PROMPT_GEMINI}Para una mascota de raza: ${mascota.raza}, edad: ${mascota.edad} años, peso: ${mascota.peso} kg, actividad: ${mascota.actividad} y sin enfermedades conocidas con un presupuesto promedio en Ecuador. Se resumido y conciso. mascota de raza: ${mascota.raza}, edad: ${mascota.edad} años, peso: ${mascota.peso} kg, actividad: ${mascota.actividad},`
+            contents: `${process.env.PROMPT_GEMINI} Para una mascota de raza: ${mascota.raza}, edad: ${mascota.edad} años, peso: ${mascota.peso} kg, actividad: ${mascota.actividad} y sin enfermedades conocidas con un presupuesto ${presupuesto} en Ecuador. Se resumido y conciso`
         });
 
         mascota.dieta = response.text;

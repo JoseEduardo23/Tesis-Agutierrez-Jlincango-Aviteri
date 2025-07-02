@@ -6,8 +6,7 @@ mongoose.set("strictQuery", true);
 
 const connection = async () => {
   try {
-    // Verifica si la variable de entorno está cargada correctamente
-    //Hola
+
     console.log("MongoDB URL:", process.env.MONGODB_URL_PRODUCTION);
 
     const conn = await mongoose.connect(process.env.MONGODB_URL_PRODUCTION);
