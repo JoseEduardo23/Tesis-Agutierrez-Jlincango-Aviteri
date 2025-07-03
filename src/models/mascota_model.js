@@ -50,6 +50,10 @@ const mascotaSchema = new Schema(
       ref: "Usuario",
       required: true,
     },
+    dietaTiempo: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -60,7 +60,7 @@ describe("Controladores de Usuario", () => {
                 encriptarPassword: encriptarPasswordMock,
                 crearToken: crearTokenMock
             }));
-            
+
             sendMailToUser.mockResolvedValue(true);
             req = {
                 body: {
@@ -105,7 +105,7 @@ describe("Controladores de Usuario", () => {
             expect(res.status).toHaveBeenCalledWith(404);
         });
 
-        it('debería retornar error si no encuentra usuario', async () => {
+        it('debería retornar error si no encuentra al usuario cliente', async () => {
             jest.spyOn(Usuario, 'findOne').mockImplementation(() => {
                 return {
                     select: jest.fn().mockResolvedValueOnce(null)
@@ -194,6 +194,17 @@ describe("Controladores de Usuario", () => {
             expect(res.status).toHaveBeenCalledWith(404);
         });
 
+        it('debería retornar error ya que el token expiro', async () => {
+            Usuario.findOne.mockResolvedValue({
+                token: 'abc123',
+                tokenExpiracion: Date.now() - 360,
+                save: jest.fn()
+            });
+            req.params = { token: 'abc123' };
+            await comprobarTokenPasword(req, res);
+            expect(res.status).toHaveBeenCalledWith(403);
+        });
+
         it("debería retornar token válido", async () => {
             Usuario.findOne.mockResolvedValue({ token: "abc" });
             req.params = { token: "abc" };
@@ -206,16 +217,17 @@ describe("Controladores de Usuario", () => {
         it("debería retornar error si no coinciden contraseñas", async () => {
             req.body = { password: "123", confirmpassword: "456" }
             req.params = { token: "abc" };
-
             await nuevoPassword(req, res);
             expect(res.status).toHaveBeenCalledWith(404);
         });
         it('debería actualizar password correctamente', async () => {
-            req.body = { password: '1234', confirmpassword: '1234' };
+            req.body = { password: 'Contraseña1_', confirmpassword: 'Contraseña1_' };
             req.params = { token: 'abc' };
             const mockUser = {
                 token: 'abc',
+                tokenExpiracion: Date.now() + 3600000,
                 encriptarPassword: jest.fn().mockResolvedValue('hashed'),
+                matchPassword: jest.fn().mockResolvedValue(false),
                 save: jest.fn()
             };
             Usuario.findOne.mockResolvedValue(mockUser);
@@ -260,16 +272,17 @@ describe("Controladores de Usuario", () => {
         });
 
         it("debería actualizar contraseña correctamente", async () => {
-
             Usuario.findOne.mockResolvedValue({
                 compararPassword: jest.fn().mockResolvedValue(true),
                 encriptarPassword: jest.fn().mockResolvedValue("hashedPassword"),
-                save: jest.fn()
+                email: 'test@test.com',
+                save: jest.fn(),
             });
+            req.UsuarioBDD = { email: "test@test.com" };
             req.body = {
                 email: "test@test.com",
-                passwordactual: "1234",
-                passwordnuevo: "5678"
+                passwordactual: "Contraseña1_",
+                passwordnuevo: "ContraseñaNueva1_"
             }
 
             await actualizarPassword(req, res);

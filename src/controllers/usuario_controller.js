@@ -63,7 +63,7 @@ const login = async (req, res) => {
     try {
         const usuarioBDD = await Usuario.findOne({ email }).select("-__v -token -updatedAt -createdAt");
         if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
-        if (!usuarioBDD.confirmEmail) return res.status(403).json({ msg: "Verifica tu cuenta" });
+        if (!usuarioBDD.confirmEmail) return res.status(403).json({ msg: "Por favor, verifica tu cuenta antes de iniciar sesión" });
         const verificarPassword = await usuarioBDD.compararPassword(password);
         if (!verificarPassword) return res.status(404).json({ msg: "Contraseña incorrecta" });
         const token = generarJWT(usuarioBDD._id, "Usuario");
@@ -88,6 +88,7 @@ const recuperarPassword = async (req, res) => {
         const usuarioBDD = await Usuario.findOne({ email });
         if (!usuarioBDD) return res.status(404).json({ msg: "Usuario no registrado" });
         const token = usuarioBDD.crearToken();
+        usuarioBDD.tokenExpiracion = Date.now() + 3600000;   
         usuarioBDD.token = token;
         await sendMailToRecoveryPassword(email, token);
         await usuarioBDD.save();
@@ -103,6 +104,7 @@ const comprobarTokenPasword = async (req, res) => {
     try {
         const usuarioBDD = await Usuario.findOne({ token });
         if (!usuarioBDD?.token) return res.status(404).json({ msg: "Token inválido" });
+        if (usuarioBDD.tokenExpiracion && usuarioBDD.tokenExpiracion < Date.now()) return res.status(403).json({ msg: "El token ha expirado, por favor envía una nueva solicitud" });
         res.status(200).json({ msg: "Token válido, puedes crear una nueva contraseña" });
     } catch (error) {
         res.status(500).json({ msg: "Error al comprobar el token", error: error.message });
@@ -114,15 +116,23 @@ const nuevoPassword = async (req, res) => {
     if (Object.values(req.body).includes("")) return res.status(404).json({ msg: "Todos los campos son obligatorios" });
     if (password !== confirmpassword) return res.status(404).json({ msg: "Las contraseñas no coinciden" });
     const { token } = req.params;
+    if (!token) return res.status(400).json({ msg: "El token es obligatorio para crear una nueva contraseña" });
+    if (password.length < 8 || password.length > 20) return res.status(400).json({ msg: "La contraseña nueva debe tener entre 8 y 20 caracteres" });
+    if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/)) return res.status(400).json({msg: "La contraseña nueva debe tener al menos una mayúscula, una minúscula, un número y un símbolo especial"});
     try {
         const usuarioBDD = await Usuario.findOne({ token });
-        if (!usuarioBDD?.token) return res.status(404).json({ msg: "Token inválido" });
+        if (!usuarioBDD) return res.status(404).json({ msg: "Token inválido" });
+        if (usuarioBDD?.token !== token) return res.status(404).json({ msg: "Token inválido" });
+        if (usuarioBDD?.tokenExpiracion && usuarioBDD.tokenExpiracion < Date.now()) return res.status(403).json({ msg: "El token ha expirado, por favor envía una nueva solicitud" })
+        const mismaPassword = await usuarioBDD.matchPassword(password)
+        if(mismaPassword) return res.status(400).json({ msg: "La nueva contraseña no puede ser igual a la anterior" })
         usuarioBDD.token = null;
+        usuarioBDD.tokenExpiracion = null
         usuarioBDD.password = await usuarioBDD.encriptarPassword(password);
         await usuarioBDD.save();
         res.status(200).json({ msg: "Contraseña actualizada, ya puedes iniciar sesión" });
     } catch (error) {
-        res.status(500).json({ msg: "Error al actualizar la contraseña", error: error.message });
+        res.status(500).json({ msg: "Lo sentimos, ocurrió un Error al actualizar la contraseña", error: error.message });
     }
 };
 
@@ -150,14 +160,16 @@ const perfilUsuario = (req, res) => {
 const actualizarPassword = async (req, res) => {
     const { email, passwordactual, passwordnuevo } = req.body;
 
-    if (Object.values(req.body).includes("")) {
-        return res.status(404).json({ msg: "Lo sentimos, debes llenar todos los campos" });
-    }
+    if (Object.values(req.body).includes(""))    return res.status(404).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+    if (passwordnuevo.length < 8 || passwordnuevo.length > 20) return res.status(400).json({ msg: "La contraseña nueva debe tener entre 8 y 20 caracteres" })
+    if (!passwordnuevo.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/)) return res.status(400).json({msg: "La contraseña nueva debe tener al menos una mayúscula, una minúscula, un número y un símbolo especial"});
+    if (passwordactual === passwordnuevo) return res.status(400).json({ msg: "La nueva contraseña no puede ser igual a la actual" })
     try {
         const usuarioBDD = await Usuario.findOne({ email });
         if (!usuarioBDD) {
             return res.status(404).json({ msg: `No existe un usuario con el correo: ${email}` });
         }
+        if (!(usuarioBDD.email == req.UsuarioBDD.email)) return res.status(403).json({ msg: "Lo sentimos, no tienes permiso para actualizar la contraseña de otro CLiente" });
 
         const verificarPassword = await usuarioBDD.compararPassword(passwordactual);
         if (!verificarPassword) {
@@ -223,7 +235,6 @@ const listarUsuarios = async (req, res) => {
         const usuariosBDD = await Usuario.find();
         const ahora = new Date();
 
-        // Verificar y actualizar estado según el tiempo transcurrido
         const actualizaciones = usuariosBDD.map(async (usuario) => {
             const creado = new Date(usuario.createdAt);
             const diasTranscurridos = (ahora - creado) / (1000 * 60 * 60 * 24);
@@ -289,7 +300,6 @@ const agregarFavorito = async (req, res) => {
 
         const usuario = await Usuario.findById(req.UsuarioBDD._id);
 
-        // Verificar si ya está en favoritos
         if (usuario.favoritos.some(id => id.toString() === productoId)) {
             return res.status(400).json({ msg: "El producto ya está en favoritos" });
         }
@@ -310,7 +320,6 @@ const agregarFavorito = async (req, res) => {
     }
 };
 
-// Eliminar producto de favoritos
 const eliminarFavorito = async (req, res) => {
     const productoId = req.params.id;
 

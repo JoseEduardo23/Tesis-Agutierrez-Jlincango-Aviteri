@@ -26,6 +26,11 @@ export const validacionProducto = [
     .isString().withMessage('El campo "categoria" debe ser un texto')
     .trim()
     .isIn(['Perros', 'Gatos', 'Peces', 'Aves','Otros']).withMessage('El campo "categoria" debe ser uno de: perros, gatos, peces, aves'),
+  check("enfermedad")
+    .optional()
+    .isString().withMessage('El campo "enfermedad" debe ser un texto')
+    .trim()
+    .isLength({ max: 40 }).withMessage('La enfermedad no puede tener más de 50 caracteres'),
 
   (req, res, next) => {
     const errors = validationResult(req);

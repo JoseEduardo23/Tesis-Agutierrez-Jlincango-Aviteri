@@ -4,23 +4,15 @@ import cloudinary from "../config/cloudinary.js";
 
 const registrarProducto = async (req, res) => {
     const { nombre, descripcion, precio, stock, categoria } = req.body;
-
-    // Validar campos
-    if (Object.values(req.body).includes("")) {
-        return res.status(400).json({ msg: "Todos los campos son obligatorios" });
-    }
-
+    if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+    
     try {
-        // Verificar si el producto ya existe
         const productoExistente = await Producto.findOne({ nombre });
-        if (productoExistente) {
-            return res.status(400).json({ msg: "El producto ya existe" });
-        }
+        if (productoExistente) return res.status(400).json({ msg: "El producto ya existe" })        
 
         const categoriasValidas = ["Perros", "Gatos", "Peces", "Aves", "Otros"];
-        if (!categoriasValidas.includes(categoria)) {
-            return res.status(400).json({ msg: "Categoría inválida" });
-        }
+        if (!categoriasValidas.includes(categoria)) return res.status(400).json({ msg: "Categoría inválida" });
+        
 
         let imagenurl = ""
         let publicid = ""
@@ -41,11 +33,7 @@ const registrarProducto = async (req, res) => {
 const listarProductos = async (req, res) => {
     try {
         const productos = await Producto.find();
-        
-        if (productos.length === 0) {
-            return res.status(200).json({msg:"No hay productos registrados por el momento"});
-        }
-
+        if (productos.length === 0) return res.status(200).json({msg:"No hay productos registrados por el momento"})
         return res.json(productos);
     } catch (error) {
         console.log(error);
@@ -56,18 +44,14 @@ const listarProductos = async (req, res) => {
 const obtenerProductoPorId = async (req, res) => {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ msg: "ID inválido" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ msg: "ID inválido" })
 
     try {
         const producto = await Producto.findById(id);
-        if (!producto) {
-            return res.status(404).json({ msg: "Producto no encontrado" });
-        }
+        if (!producto) return res.status(404).json({ msg: "Producto no encontrado" })
         res.status(200).json(producto);
     } catch (error) {
-        res.status(500).json({ msg: "Error al obtener producto", error:error.mesage });
+        res.status(500).json({ msg: "Error al obtener producto", error:error.mesage })
     }
 };
 
@@ -75,14 +59,12 @@ const actualizarProducto = async (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, stock, categoria, } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ msg: "ID inválido" });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ msg: "ID inválido" })
 
-    if (Object.values(req.body).includes("")) {
-        return res.status(400).json({ msg: "Todos los campos son obligatorios" });
-    }
-
+    if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Todos los campos son obligatorios" })
+    const categoriasValidas = ["Perros", "Gatos", "Peces", "Aves", "Otros"];
+    if (!categoriasValidas.includes(categoria)) return res.status(400).json({ msg: "Categoría inválida" });
+    
     try {
         const producto = await Producto.findById(id);
         if (!producto) {
@@ -119,9 +101,7 @@ const eliminarProducto = async (req, res) => {
 
     try {
         const producto = await Producto.findById(id);
-        if (!producto) {
-            return res.status(404).json({ msg: "Producto no encontrado" });
-        }
+        if (!producto) return res.status(404).json({ msg: "Producto no encontrado" })
         if (producto.imagen_id) {
             await cloudinary.uploader.destroy(producto.imagen_id);
         }

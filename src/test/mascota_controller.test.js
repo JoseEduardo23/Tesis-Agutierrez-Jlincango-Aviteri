@@ -90,7 +90,7 @@ describe('Controlador de Mascotas', () => {
     describe('generarDieta', () => {
         it('debería retornar error si presupuesto no válido', async () => {
             req.params.id = new mongoose.Types.ObjectId();
-            req.body.presupuesto = 'Bajo';
+            req.body.presupuesto = 'Otro';
             await generarDieta(req, res);
             expect(res.status).toHaveBeenCalledWith(400);
         });

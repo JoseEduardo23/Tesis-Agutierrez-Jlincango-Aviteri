@@ -135,7 +135,7 @@ const generarDieta = async (req, res) => {
     
     const { presupuesto } = req.body;
     
-    const presupuestosValidas = ["Alto", "Medio", "Regular"];
+    const presupuestosValidas = ["Alto", "Medio", "Bajo"];
 
     if (!presupuestosValidas.includes(presupuesto)) {
         return res.status(400).json({ msg: "Ingrese un presupuesto valido" });

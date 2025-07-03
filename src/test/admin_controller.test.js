@@ -33,9 +33,8 @@ describe('Controlador de Administrador', () => {
 
 		it("debería retornar error si hay campos vacíos", async () => {
 			req.body = { email: "", password: "" };
-
 			await login(req, res);
-			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.status).toHaveBeenCalledWith(400);
 		});
 
 		it('debería retornar error si no encuentra administrador', async () => {
@@ -59,7 +58,7 @@ describe('Controlador de Administrador', () => {
 				direccion: 'Dirección',
 				telefono: '0999999999',
 				_id: new mongoose.Types.ObjectId(),
-				email: 'test@test.com'
+				email: 'test@test.com',
 			};
 
 			jest.spyOn(Administrador, 'findOne').mockImplementation(() => {
@@ -73,12 +72,12 @@ describe('Controlador de Administrador', () => {
 			expect(res.status).toHaveBeenCalledWith(200);
 			expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
 				nombre: administradorMock.nombre,
-				email: administradorMock.email,
 				apellido: administradorMock.apellido,
 				direccion: administradorMock.direccion,
 				telefono: administradorMock.telefono,
 				token: generarJWT(administradorMock._id),
-				_id: administradorMock._id
+				_id: administradorMock._id,
+				msg: "Bienvenido al sistema de administración de Tiendanimal"
 			}));
 		});
 	});
@@ -87,8 +86,8 @@ describe('Controlador de Administrador', () => {
 		it('debería retornar error si el email está vacío', async () => {
 			req.body = { email: '' };
 			await recuperarPassword(req, res);
-			expect(res.status).toHaveBeenCalledWith(404);
-			expect(res.json).toHaveBeenCalledWith({ msg: "Lo sentimos, debes llenar todos los campos" });
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({ msg: "Debes llenar el campo correctamente" });
 		});
 
 		it('debería retornar error si no encuentra al administrador', async () => {
@@ -122,9 +121,22 @@ describe('Controlador de Administrador', () => {
 			await comprobarTokenPasword(req, res);
 			expect(res.status).toHaveBeenCalledWith(404);
 		});
+		
+		it('debería retornar error ya que el token expiro', async () => {
+			Administrador.findOne.mockResolvedValue({ token: 'abc123', 
+				tokenExpiracion: Date.now() - 360, 
+				save: jest.fn() 
+			});
+			req.params = { token: 'abc123' };
+			await comprobarTokenPasword(req, res);
+			expect(res.status).toHaveBeenCalledWith(403);
+		});
 
 		it('debería confirmar token válido', async () => {
-			Administrador.findOne.mockResolvedValue({ token: 'abc123', save: jest.fn() });
+			Administrador.findOne.mockResolvedValue({ token: 'abc123', 
+				tokenExpiracion: Date.now() + 3600000, 
+				save: jest.fn() 
+			});
 			req.params = { token: 'abc123' };
 			await comprobarTokenPasword(req, res);
 			expect(res.status).toHaveBeenCalledWith(200);
@@ -136,15 +148,17 @@ describe('Controlador de Administrador', () => {
 			req.body = { password: '1234', confirmpassword: '4321' };
 			req.params = { token: 'abc' };
 			await nuevoPassword(req, res);
-			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.status).toHaveBeenCalledWith(400);
 		});
 
 		it('debería actualizar password correctamente', async () => {
-			req.body = { password: '1234', confirmpassword: '1234' };
+			req.body = { password: 'Contraseña1_', confirmpassword: 'Contraseña1_' };
 			req.params = { token: 'abc' };
 			const mockAdmin = {
 				token: 'abc',
 				encrypPassword: jest.fn().mockResolvedValue('hashed'),
+				tokenExpiracion: Date.now() + 3600000,
+				matchPassword: jest.fn().mockResolvedValue(false), 
 				save: jest.fn()
 			};
 			Administrador.findOne.mockResolvedValue(mockAdmin);
@@ -174,16 +188,18 @@ describe('Controlador de Administrador', () => {
 		it('debería retornar error si faltan campos', async () => {
 			req.body = { email: '', passwordactual: '', passwordnuevo: '' };
 			await actualizarPassword(req, res);
-			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.status).toHaveBeenCalledWith(400);
 		});
 
-		it('debería actualizar password correctamente', async () => {
+		it('debería actualizar contraseña correctamente', async () => {
 			req.body = { 
 				email: 'test@test.com', 
-				passwordactual: '1234', 
-				passwordnuevo: '5678'
+				passwordactual: 'Contraseña1_', 
+				passwordnuevo: 'ContraseñaNueva1_'
 			};
+			req.AdministradorBDD = { email: 'test@test.com' }
 			const mockAdmin = {
+				email: 'test@test.com',
 				matchPassword: jest.fn().mockResolvedValue(true),
 				encrypPassword: jest.fn().mockResolvedValue('hashed'),
 				save: jest.fn()

@@ -34,8 +34,8 @@ export const validacionUsers = [
 
     check("password")
         .exists().withMessage('El campo "password" es obligatorio')
-        .isLength({ min: 8 }).withMessage('El campo "password" debe tener al menos 8 caracteres')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/).withMessage('El campo "password" debe contener al menos una letra mayúscula, una letra minúscula y un número')
+        .isLength({ min: 8, max:20 }).withMessage('El campo "password" debe tener entre 8 y 20 caracteres')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/).withMessage('El campo "password" debe contener al menos una letra mayúscula, una letra minúscula, un número y un caracter especial')
         .customSanitizer(value => value?.trim()),
 
 

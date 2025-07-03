@@ -44,6 +44,10 @@ const adminSchema = new Schema({
         type:String,
         default:null
     },
+    tokenExpiracion:{
+        type:Date,
+        default:null
+    }
 },{
     timestamps:true
 })

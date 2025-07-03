@@ -20,6 +20,7 @@ app.set('port', process.env.PORT || 3000);
 const corsOptions = {
   origin: [
     'https://tiendaanimal.netlify.app',
+    'http://localhost:5173',
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

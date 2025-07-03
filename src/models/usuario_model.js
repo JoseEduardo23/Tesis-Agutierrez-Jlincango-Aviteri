@@ -52,6 +52,10 @@ const usuarioSchema = new Schema({
     type: String,
     default: null
   },
+  tokenExpiracion:{
+        type:Date,
+        default:null
+  },
   confirmEmail: {
     type: Boolean,
     default: false
@@ -59,20 +63,18 @@ const usuarioSchema = new Schema({
   favoritos: [{
     type: Schema.Types.ObjectId,
     ref: 'Producto'
-  }]
+  }],
 },
   {
     timestamps: true,
   }
 );
 
-// Método de instancia para encriptar la contraseña
 usuarioSchema.methods.encriptarPassword = async function (password) {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
 };
 
-// Método de instancia para comparar contraseñas
 usuarioSchema.methods.compararPassword = async function (password) {
   const response = await bcrypt.compare(password, this.password);
   return response;
